@@ -1,0 +1,66 @@
+/* modified meyer reset */
+html, body, div, span, applet, object, embed, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, address, cite, code, del, dfn, em, font, img, ins, kbd, q, s, samp, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    font-size: 1em;
+    font-style: inherit;
+    font-weight: inherit;
+    vertical-align: baseline;
+    background: transparent;
+    text-align: inherit;
+    text-decoration: inherit;
+    color: inherit;
+}
+sup {
+    vertical-align: text-top;
+    font-size: 0.6em;
+}
+sub {
+    vertical-align: text-bottom;
+    font-size: 0.6em;
+}
+body {
+    font: 12px/1.25 sans-serif;
+    text-align: left;
+}
+h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+}
+ol, ul {
+    list-style: none;
+}
+ol.default {
+    list-style: decimal outside;
+}
+ul.default {
+    list-style: disc outside;
+}
+blockquote, q {
+    quotes: none;
+}
+blockquote:before, blockquote:after, q:before, q:after {
+    content: '';
+    content: none;
+}
+:focus {
+    outline: 0;
+}
+a:focus {
+    outline: 1px dashed invert;
+}
+ins {
+    font-style: italic;
+    text-decoration: none;
+}
+del, s {
+    text-decoration: line-through;
+}
+a, cite {
+    text-decoration: underline;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}

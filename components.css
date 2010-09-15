@@ -1,0 +1,257 @@
+/**
+ *
+ * Jelo reusable components
+ * Copyright 2010 HB Stone
+ * License: http://creativecommons.org/licenses/MIT/
+ *
+ * Derived from concepts at OOCSS.org
+ * Copyright 2009 Nicole Sullivan
+ * License: http://creativecommons.org/licenses/BSD/
+ *
+ */
+
+/**************************************\
+  module structural classes
+\**************************************/
+.-module {
+    margin: 1em;
+    border: 1px solid #999;
+}
+.-module, .-inner, .-hd, .-bd, .-ft {
+    position: relative;
+    overflow: hidden;
+}
+.-inner, .-hd, .-bd, .-ft {
+    zoom: 1;
+}
+.-hd, .-bd, .-ft {
+    padding: 0.25em 1em;
+}
+.-inner:after, .-hd:after, .-bd:after, .-ft:after {clear:both;display:block;visibility:hidden;overflow:hidden;height:0 !important;line-height:0;font-size:xx-large;content:" x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x ";}
+
+
+/**************************************\
+  decorators: corners
+\**************************************/
+.-round {
+    border-radius: 0.6em;
+    -moz-border-radius: 0.6em;
+    -webkit-border-radius: 0.6em;
+}
+.-round-inside {
+    border-radius: 0.5em;
+    -moz-border-radius: 0.5em;
+    -webkit-border-radius: 0.5em;
+}
+.-round-top {
+    border-radius: 0.6em 0.6em 0 0;
+    -moz-border-radius: 0.6em 0.6em 0 0;
+    -webkit-border-radius: 0.6em 0.6em 0 0;
+}
+.-round-top-inside {
+    border-radius: 0.5em 0.5em 0 0;
+    -moz-border-radius: 0.5em 0.5em 0 0;
+    -webkit-border-radius: 0.5em 0.5em 0 0;
+}
+.-round-right {
+    border-radius: 0 0.6em 0.6em 0;
+    -moz-border-radius: 0 0.6em 0.6em 0;
+    -webkit-border-radius: 0 0.6em 0.6em 0;
+}
+.-round-right-inside {
+    border-radius: 0 0.5em 0.5em 0;
+    -moz-border-radius: 0 0.5em 0.5em 0;
+    -webkit-border-radius: 0 0.5em 0.5em 0;
+}
+.-round-bottom {
+    border-radius: 0 0 0.6em 0.6em;
+    -moz-border-radius: 0 0 0.6em 0.6em;
+    -webkit-border-radius: 0 0 0.6em 0.6em;
+}
+.-round-bottom-inside {
+    border-radius: 0 0 0.5em 0.5em;
+    -moz-border-radius: 0 0 0.5em 0.5em;
+    -webkit-border-radius: 0 0 0.5em 0.5em;
+}
+.-round-left {
+    border-radius: 0.6em 0 0 0.6em;
+    -moz-border-radius: 0.6em 0 0 0.6em;
+    -webkit-border-radius: 0.6em 0 0 0.6em;
+}
+.-round-left-inside {
+    border-radius: 0.5em 0 0 0.5em;
+    -moz-border-radius: 0.5em 0 0 0.5em;
+    -webkit-border-radius: 0.5em 0 0 0.5em;
+}
+.-round-more {
+    border-radius: 1.25em;
+    -moz-border-radius: 1.25em;
+    -webkit-border-radius: 1.25em;
+}
+.-round-inside-more {
+    border-radius: 1.2em;
+    -moz-border-radius: 1.2em;
+    -webkit-border-radius: 1.2em;
+}
+.-round-top-more {
+    border-radius: 1.25em 1.25em 0 0;
+    -moz-border-radius: 1.25em 1.25em 0 0;
+    -webkit-border-radius: 1.25em 1.25em 0 0;
+}
+.-round-top-inside-more {
+    border-radius: 1.2em 1.2em 0 0;
+    -moz-border-radius: 1.2em 1.2em 0 0;
+    -webkit-border-radius: 1.2em 1.2em 0 0;
+}
+.-round-right-more {
+    border-radius: 0 1.25em 1.25em 0;
+    -moz-border-radius: 0 1.25em 1.25em 0;
+    -webkit-border-radius: 0 1.25em 1.25em 0;
+}
+.-round-right-inside-more {
+    border-radius: 0 1.2em 1.2em 0;
+    -moz-border-radius: 0 1.2em 1.2em 0;
+    -webkit-border-radius: 0 1.2em 1.2em 0;
+}
+.-round-bottom-more{
+    border-radius: 0 0 1.25em 1.25em;
+    -moz-border-radius: 0 0 1.25em 1.25em;
+    -webkit-border-radius: 0 0 1.25em 1.25em;
+}
+.-round-bottom-inside-more {
+    border-radius: 0 0 1.2em 1.2em;
+    -moz-border-radius: 0 0 1.2em 1.2em;
+    -webkit-border-radius: 0 0 1.2em 1.2em;
+}
+.-round-left-more {
+    border-radius: 1.25em 0 0 1.25em;
+    -moz-border-radius: 1.25em 0 0 1.25em;
+    -webkit-border-radius: 1.25em 0 0 1.25em;
+}
+.-round-left-inside-more {
+    border-radius: 1.2em 0 0 1.2em;
+    -moz-border-radius: 1.2em 0 0 1.2em;
+    -webkit-border-radius: 1.2em 0 0 1.2em;
+}
+
+/**************************************\
+  decorators: shadows
+\**************************************/
+.-shadow {
+    box-shadow: 0 0 0.4em rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: 0 0 0.4em rgba(0, 0, 0, 0.5);
+    -webkit-box-shadow: 0 0 0.4em rgba(0, 0, 0, 0.5);
+}
+.-shadow-top {
+    box-shadow: 0 -0.2em 0.4em rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: 0 -0.2em 0.4em rgba(0, 0, 0, 0.5);
+    -webkit-box-shadow: 0 -0.2em 0.4em rgba(0, 0, 0, 0.5);
+}
+.-shadow-right {
+    box-shadow: 0.2em 0 0.4em rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: 0.2em 0 0.4em rgba(0, 0, 0, 0.5);
+    -webkit-box-shadow: 0.2em 0 0.4em rgba(0, 0, 0, 0.5);
+}
+.-shadow-bottom {
+    box-shadow: 0 0.2em 0.4em rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: 0 0.2em 0.4em rgba(0, 0, 0, 0.5);
+    -webkit-box-shadow: 0 0.2em 0.4em rgba(0, 0, 0, 0.5);
+}
+.-shadow-left {
+    box-shadow: -0.2em 0 0.4em rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: -0.2em 0 0.4em rgba(0, 0, 0, 0.5);
+    -webkit-box-shadow: -0.2em 0 0.4em rgba(0, 0, 0, 0.5);
+}
+.-shadow-more {
+    box-shadow: 0 0 1em rgba(0, 0, 0, 0.33);
+    -moz-box-shadow: 0 0 1em rgba(0, 0, 0, 0.33);
+    -webkit-box-shadow: 0 0 1em rgba(0, 0, 0, 0.33);
+}
+.-shadow-top-more {
+    box-shadow: 0 -0.5em 1em rgba(0, 0, 0, 0.33);
+    -moz-box-shadow: 0 -0.5em 1em rgba(0, 0, 0, 0.33);
+    -webkit-box-shadow: 0 -0.5em 1em rgba(0, 0, 0, 0.33);
+}
+.-shadow-right-more {
+    box-shadow: 0.5em 0 1em rgba(0, 0, 0, 0.33);
+    -moz-box-shadow: 0.5em 0 1em rgba(0, 0, 0, 0.33);
+    -webkit-box-shadow: 0.5em 0 1em rgba(0, 0, 0, 0.33);
+}
+.-shadow-bottom-more {
+    box-shadow: 0 0.5em 1em rgba(0, 0, 0, 0.33);
+    -moz-box-shadow: 0 0.5em 1em rgba(0, 0, 0, 0.33);
+    -webkit-box-shadow: 0 0.5em 1em rgba(0, 0, 0, 0.33);
+}
+.-shadow-left-more {
+    box-shadow: -0.5em 0 1em rgba(0, 0, 0, 0.33);
+    -moz-box-shadow: -0.5em 0 1em rgba(0, 0, 0, 0.33);
+    -webkit-box-shadow: -0.5em 0 1em rgba(0, 0, 0, 0.33);
+}
+
+/**************************************\
+  decorators: gradients
+\**************************************/
+.-shiny {
+    background: -moz-linear-gradient(center top, rgba(255,255,255,0.2), rgba(0,0,0,0.2));
+    background: -webkit-gradient(linear, left top, left bottom, from(rgba(255,255,255,0.2)), to(rgba(0,0,0,0.2)));
+}
+.-shiny-more {
+    background: -moz-linear-gradient(center top, rgba(255,255,255,0.33), rgba(0,0,0,0.33));
+    background: -webkit-gradient(linear, left top, left bottom, from(rgba(255,255,255,0.33)), to(rgba(0,0,0,0.33)));
+}
+.-shiny-button {
+    background: -moz-linear-gradient(center top, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2) 50%, rgba(128, 128, 128, 0.2) 60%, rgba(128, 128, 128, 0) 90%, rgba(255, 255, 255, 0.5) 95%);
+    background: -webkit-gradient(linear, left top, left bottom, from(rgba(255, 255, 255, 0.75)), color-stop(0.03, rgba(255, 255, 255, 0.25)), color-stop(0.50, rgba(255, 255, 255, 0.5)), color-stop(0.94, rgba(128, 128, 128, 0.5)), to(rgba(255, 255, 255, 0.75)));
+}
+
+/**************************************\
+  decorators: position
+\**************************************/
+
+
+/**************************************\
+  decorators: unsorted
+\**************************************/
+.-hidden {
+    display: none !important;
+}
+
+/**************************************\
+  functional classes
+\**************************************/
+.-toolkit {
+    position: absolute;
+    top: 0.1em;
+    right: 0.5em;
+}
+.-toolkit li {
+    float: left;
+    padding: 0.1em 0.33em;
+    width: 1em;
+    font-family: "Arial Unicode MS", Arial, Geneva, sans-serif;
+    text-align: center;
+    cursor: pointer;
+}
+.-tool-resize {
+    position: absolute;
+    bottom: 0em;
+    right: 0em;
+    width: 1em;
+    height: 0.5em;
+    font-family: "Arial Unicode MS", Arial, Geneva, sans-serif;
+    cursor: se-resize;
+    z-index: 99999;
+}
+.-drag-proxy {
+    position: absolute;
+    z-index: 1000000000;
+    background: #f0f6ff;
+    border: 1px dashed #999;
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    display: none;
+    opacity: 0.9;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=90)";
+    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=90);
+}
