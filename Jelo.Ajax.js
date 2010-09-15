@@ -141,6 +141,7 @@ Jelo.mold('Ajax', function() {
                 }
             };
             switch (m) {
+                case "DELETE":
                 case "GET" :
                     u += q;
                     //u += ((/\?/).test(u) ? '&' : '?') + '_now=' + (new Date()).getTime();
@@ -149,9 +150,8 @@ Jelo.mold('Ajax', function() {
                     x.setRequestHeader("X-Requested-With", 'XMLHttpRequest');
                     x.send(null);
                     break;
-                case "PUT":
-                case "DELETE":
                 case "POST" :
+                case "PUT":
                     q = q.split("?", 2)[1];
                     x.open(m, u, true);
                     x.onreadystatechange = orsc;

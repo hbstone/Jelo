@@ -145,19 +145,20 @@ Jelo.mold('DragDrop', function() {
          * @function
          */
         setDraggable: function(el, fn, handle) {
-            if (Jelo.isEnumerale(el)) {
+            if (Jelo.isIterable(el)) {
                 Jelo.each(el, function(item) {
                     Jelo.DragDrop.setDraggable(item, fn, handle);
                 });
             } else {
                 el._dragHandle = handle || el;
                 el._dragHandle._dragTarget = el;
-                fn = fn || {};
                 switch(typeof fn) {
                     case 'function':
                         el._dragMouseMove = fn;
                         break;
+                    case 'undefined': // fall through
                     case 'object':
+                        fn = fn || {}; // avoid null
                         el._dragMouseDown = fn.before || this.getBehavior('before');
                         el._dragMouseMove = fn.drag || this.getBehavior('drag');
                         el._dragMouseUp = fn.after || this.getBehavior('after');
@@ -216,18 +217,19 @@ Jelo.mold('DragDrop', function() {
          * @function
          */
         setDroppable: function(el, fn, handle) {
-            if (Jelo.isEnumerale(el)) {
+            if (Jelo.isIterable(el)) {
                 Jelo.each(el, function(item) {
                     Jelo.DragDrop.setDroppable(item, fn, handle);
                 });
             } else {
                 el._dropHandle = handle || el;
-                fn = fn || {};
                 switch(typeof fn) {
                     case 'function':
                         el._dropMouseUp = fn;
                         break;
+                    case 'undefined': // fall through
                     case 'object':
+                        fn = fn || {}; // avoid null
                         el._dropMouseEnter = fn.enter || this.getBehavior('enter');
                         el._dropMouseLeave = fn.leave || this.getBehavior('leave');
                         el._dropMouseMove = fn.over || this.getBehavior('over');

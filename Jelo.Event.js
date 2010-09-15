@@ -1,233 +1,182 @@
 /**
- * @namespace Event processing and normalization.
- * @name Jelo.Event
+ * Event registration and handling. Also provides for custom events.
+ * 
+ * Adapted from code written by Stephen Stchur
+ * Original License: (Ms-PL) http://www.opensource.org/licenses/ms-pl.html
+ * 
+ * @namespace Jelo.Event
  */
 Jelo.mold('Event', function() {
-    /** @private */
-    var live = {};
-    
-    /** @private */
-    function find(el, ev, fn) {
-        var h = el._handlers;
-        if (h) {
-            var d = el.document || el,
-                w = d.parentWindow, i, a;
-            for (i = h.length - 1; i >= 0; i--) {
-                a = w._ieHandlers[h[i]];
-                if (a.eventType == ev && a.handler == fn) {
-                    return i;
+    var add = function() {
+        if ('addEventListener' in document) {
+            return function(el, ev, fn, useCapture, direct) {
+                var pev = pseudo[ev];
+                if (pev && (direct !== false)) {
+                    pev.call(el, fn, useCapture, true);
+                } else {
+                    el.addEventListener(ev, fn, useCapture);
                 }
-            }
+            };
+        } else if ('attachEvent' in document) {
+            var body = (document.compatMode && document.compatMode != "BackCompat") ? document.documentElement : document.body;
+            return function(el, ev, fn, useCapture, direct) {
+                var pev = pseudo[ev];
+                if (pev && (direct !== false)) {
+                    pev.call(el, fn, useCapture, true);
+                } else {
+                    var key = generateKey(el, ev, fn);
+                    if (key in hash) {
+                        return;
+                    }
+                    var f = function(evt) {
+                        var e = evt || window.event;
+                        e.target = e.srcElement;
+                        e.pageX = e.clientX + body.scrollLeft;
+                        e.pageY = e.clientY + body.scrollTop;
+                        if (ev == 'mouseover') {
+                            e.relatedTarget = e.fromElement;
+                        } else if (ev == 'mouseout') {
+                            e.relatedTarget = e.toElement;
+                        }
+                        e.preventDefault = function() {
+                            e.returnValue = false;
+                        };
+                        e.stopPropagation = e.stopImmediatePropagation = function() {
+                            e.cancelBubble = true;
+                        };
+                        fn.call(el, e);
+                        e.target = null;
+                        e.relatedTarget = null;
+                        e.preventDefault = null;
+                        e.stopPropagation = null;
+                        e = null;
+                    };
+                    hash[key] = f;
+                    el.attachEvent('on' + ev, f);
+                    key = null;
+                    f = null;
+                }
+            };
+        } else {
+            return function() {};
         }
-        return -1;
-    }
-    
-    /** @private */
-    function removeAllHandlers() {
-        var w = this,
-            ie = w._ieHandlers;
-        for (var i in ie) {
-            if (ie.hasOwnProperty(i)) {
-                var h = ie[i];
-                h.element.detachEvent('on' + h.eventType, h.wrappedHandler);
-                delete h[i];
-            }
-        }
-    }
-    
-    /** @scope Jelo.Event */
-    return {
-        /**
-         * Listens for an event on all elements which match a given CSS selector, throughout the life of the page. New elements that match will automatically be caught.
-         * @function
-         * @param {String} selector The valid CSS selector to match against.
-         * @param {String} event An interactive event, such as 'click', 'keydown', 'mousemove', etc. Non-interactive events (such as 'change' or 'load') may not be caught.
-         * @param {Function} fn Your event handler. In the handler, <code>this</code> refers to the event target, and <code>arguments[0]</code> is the event itself.
-         * @return {Function} The delegate function wrapped around the supplied event handler. {@link Jelo.Event.removeLive}
-         */
-        addLive    : function(str, ev, fn) {
-            var func = function(e) {
-                var t = e.target,
-                    el = $$(str),
-                    l = el.length,
-                    i = l;
-                for (; i >= 0; --i) {
-                    if (el[i] == t) {
-                        fn.call(el[i], e);
+    }();
+    var remove = function() {
+        if ('removeEventListener' in document) {
+            return function(el, ev, fn, useCapture, direct) {
+                var pev = pseudo[ev];
+                if (pev && (direct !== false)) {
+                    pev.call(el, fn, useCapture, false);
+                } else {
+                    el.removeEventListener(ev, fn, useCapture);
+                }
+            };
+        } else if ('detachEvent' in document) {
+            return function(el, ev, fn, useCapture, direct) {
+                var pev = pseudo[ev];
+                if (pev && (direct !== false)) {
+                    pev.call(el, fn, useCapture, false);
+                } else {
+                    var key = generateKey(el, ev, fn);
+                    if (key in hash) {
+                        var f = hash[key];
+                        el.detachEvent('on' + ev, f);
+                        delete hash[key];
+                        key = null;
+                        f = null;
                     }
                 }
             };
-            Jelo.Event.add(document, ev, func);
-            return func; // for removal
+        } else {
+            return function() {};
+        }
+    }();
+    function defineEvent(ev, fn) {
+        pseudo[ev] = fn;
+    }
+    /** @private */
+    function generateKey(el, ev, fn) {
+        return '{' + getGUID(el) + '|' + ev + '|' + getGUID(fn) + '}';
+    }
+    /** @private */
+    function isAncestor(ancestor, descendant, checkSelf) {
+        if (descendant === ancestor) {
+            return !!checkSelf;
+        }
+        while(descendant && descendant !== ancestor) {
+            descendant = descendant.parentNode;
+        }
+        return (descendant === ancestor);
+        
+    }
+    /** @private */
+    function mouseEnter(fn) {
+        var key = getGUID(fn);
+        var f = hash[key];
+        if (!f) {
+            f = hash[key] = function(ev) {
+                var relatedTarget = ev.relatedTarget;
+                if (isAncestor(this, relatedTarget, true)) {
+                    return;
+                }
+                fn.call(this, ev);
+            };
+        }
+        return f;
+    }
+    /** @private */
+    function getGUID(x) {
+        if (x === window) {
+            return 'theWindow';
+        }
+        if (x === document) {
+            return 'theDocument';
+        }
+        if (typeof x.uID !== 'undefined') {
+            return x.uID;
+        }
+        var str = '__$$GUID$$__';
+        if (!(str in x)) {
+            x[str] = counter++;
+        }
+        return x[str];
+    }
+    /** @private */
+    var counter = 0,
+        hash = {}, 
+        pseudo = {
+            'mouseenter' : function(fn, useCapture, isListening) {
+                var f = mouseEnter(fn);
+                isListening ? Jelo.Event.add(this, 'mouseover', f, useCapture, false) : Jelo.Event.remove(this, 'mouseover', f, useCapture, false);
+                f = null;
+            },
+            'mouseleave' : function(fn, useCapture, isListening) {
+                var f = mouseEnter(fn);
+                isListening ? Jelo.Event.add(this, 'mouseout', f, useCapture, false) : Jelo.Event.remove(this, 'mouseout', f, useCapture, false);
+            }
+        };
+    /** @scope Jelo.Event */
+    return {
+        add : function(el, ev, fn) {
+            if (Jelo.isIterable(el)) {
+                for (var i = 0, l = el.length; i < l; i++) {
+                    add(el[i], ev, fn);
+                }
+            } else {
+                add(el, ev, fn);
+            }
         },
-        /**
-         * Removes a delegate event listener. See {@link Jelo.Event.addLive}.
-         * @function
-         * @param {String} event Which event to stop handling.
-         * @param {Function} fn Which listener to stop executing when the supplied event occurs. NOTE: This is the function returned by {@link Jelo.Event.addLive}, not the function supplied to it.
-         */
-        removeLive : function(ev, func) {
-            Jelo.Event.remove(document, ev, func);
+        remove : function(el, ev, fn) {
+            if (Jelo.isIterable(el)) {
+                for (var i = 0, l = el.length; i < l; i++) {
+                    remove(el[i], ev, fn);
+                }
+            } else {
+                remove(el, ev, fn);
+            }
         },
-        /**
-         * Starts listening for an event. Shortcut: <code>Jelo.un(el, ev, fn)</code>
-         * @function
-         * @param {HTMLElement|Array} el One or more elements to listen on.
-         * @param {String} ev Which event to listen for.
-         * @param {Function} fn Code to execute when the event occurs. The execution context ("this") is 
-         * the element on which the event occurred, and the only argument to this handler is the event object.
-         */
-        add        : function() {
-            return document.addEventListener ? function(el, ev, fn) {
-                    if (Jelo.Core.isEnumerable(el)) {
-                        var i,
-                            l = el.length;
-                        for (i = 0; i < l; i++) {
-                            Jelo.Event.add(el[i], ev, fn);
-                        }
-                    } else {
-                        el.addEventListener(ev, fn, false);
-                    }
-                } : function(el, ev, fn) {
-                    if (Jelo.Core.isEnumerable(el)) {
-                        var i,
-                            l = el.length;
-                        for (i = 0; i < l; i++) {
-                            Jelo.Event.add(el[i], ev, fn);
-                        }
-                    } else {
-                        if (find(el, ev, fn) != -1) {
-                            return;
-                        }
-                        var wh = function(e) {
-                            e = e || window.event;
-                            var event = {
-                                _event          : e,
-                                type            : e.type,
-                                target          : e.srcElement,
-                                currentTarget   : el,
-                                relatedTarget   : e.fromElement || e.toElement,
-                                eventPhase      : (e.srcElement == el) ? 2 : 3,
-                                clientX         : e.clientX,
-                                clientY         : e.clientY,
-                                screenX         : e.screenX,
-                                screenY         : e.screenY,
-                                altKey          : e.altKey,
-                                ctrlKey         : e.ctrlKey,
-                                shiftKey        : e.shiftKey,
-                                charCode        : e.charCode || e.keyCode,
-                                keyCode         : e.keyCode || e.charCode,
-                                button          : e.button ? {
-                                        1 : 0,
-                                        4 : 1,
-                                        2 : 2
-                                    }[e.button] : -1,
-                                which           : e.button ? e.button + 1 : e.keyCode,
-                                stopPropagation : function() {
-                                    this._event.cancelBubble = true;
-                                },
-                                preventDefault  : function() {
-                                    var str = '';
-                                    Jelo.each(this._event, function(item, index) {
-                                        str += index + ': ' + item + "\r\n";
-                                    });
-                                    this._event.returnValue = false;
-                                }
-                            };
-                            fn.call(el, event);
-                        };
-                        el.attachEvent('on' + ev, wh);
-                        var h = {
-                            element        : el,
-                            eventType      : ev,
-                            handler        : fn,
-                            wrappedHandler : wh
-                        };
-                        var d = el.document || el;
-                        var w = d.parentWindow;
-                        var id = 'h' + Jelo.uID();
-                        if (!w._ieHandlers) {
-                            w._ieHandlers = {};
-                        }
-                        w._ieHandlers[id] = h;
-                        if (!el._handlers) {
-                            el._handlers = [];
-                        }
-                        el._handlers.push(id);
-                        if (!w._onunloadRegistered) {
-                            w.attachEvent('onunload', removeAllHandlers);
-                            w._onunloadRegistered = true;
-                        }
-                    }
-                };
-        }(),
-        /**
-         * Stops listening for an event. Shortcut: <code>Jelo.un(el, ev, fn)</code>
-         * @function
-         * @param {HTMLElement|Array} el One or more elements to stop listening on.
-         * @param {String} ev Which event to stop listening for.
-         * @param {Function} fn The handler previously attached to the supplied element.
-         */
-        remove     : function() {
-            return (document.removeEventListener) ? function(el, ev, fn) {
-                    if (Jelo.Core.isEnumerable(el)) {
-                        var i,
-                            l = el.length;
-                        for (i = 0; i < l; i++) {
-                            Jelo.Event.remove(el[i], ev, fn);
-                        }
-                    } else {
-                        el.removeEventListener(ev, fn, false);
-                    }
-                } : function(el, ev, fn) {
-                    var i;
-                    if (Jelo.Core.isEnumerable(el)) {
-                        var l = el.length;
-                        for (i = 0; i < l; i++) {
-                            Jelo.Event.remove(el[i], ev, fn);
-                        }
-                    } else {
-                        i = find(el, ev, fn);
-                        if (i != -1) {
-                            var d = el.document || el;
-                            var w = d.parentWindow;
-                            var hid = el._handlers[i];
-                            var h = w._ieHandlers[hid];
-                            el.detachEvent('on' + ev, h.wrappedHandler);
-                            el._handlers.splice(i, 1);
-                            delete w._ieHandlers[hid];
-                        }
-                    }
-                };
-        }()
+        create : defineEvent
     };
-    
 }());
-/**
- * Shorthand for {@link Jelo.Event.add}
- * @memberOf Jelo
- * @name on
- * @function
- */
 Jelo.on = Jelo.Event.add;
-/**
- * Shorthand for {@link Jelo.Event.remove}
- * @memberOf Jelo
- * @name un
- * @function
- */
 Jelo.un = Jelo.Event.remove;
-/**
- * Shorthand for {@link Jelo.Event.addLive}
- * @memberOf Jelo
- * @name onLive
- * @function
- */
-Jelo.onLive = Jelo.Event.addLive;
-/**
- * Shorthand for {@link Jelo.Event.removeLive}
- * @memberOf Jelo
- * @name unLive
- * @function
- */
-Jelo.unLive = Jelo.Event.removeLive;

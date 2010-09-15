@@ -113,7 +113,7 @@ Jelo.mold('Anim', function() {
         if (!c) {
             return;
         }
-        if (Jelo.isEnumerable(c.me)) {
+        if (Jelo.isIterable(c.me)) {
             Jelo.each(c.me, function(item) {
                 // this scope is required, bugs ensue if this "each" is unrolled
                 var config = {};
@@ -172,7 +172,8 @@ Jelo.mold('Anim', function() {
             end      : end,
             percent  : 0,
             current  : current,
-            target   : target
+            target   : target,
+            config   : c
         };
         
         // cancel duplicate animations (avoids certain conflicts)
@@ -183,7 +184,7 @@ Jelo.mold('Anim', function() {
         }
         
         _.a.push(o);
-        c.before.call(o, o);
+        c.before.call(c, o);
         run();
     }
     
@@ -206,7 +207,7 @@ Jelo.mold('Anim', function() {
                     }
                     for (i = -1; ++i < c.length;) {
                         r = c[i];
-                        r.fn.call(r.o, r.o);
+                        r.fn.call(r.o.config, r.o);
                     }
                     _.r = [];
                 }
@@ -232,7 +233,7 @@ Jelo.mold('Anim', function() {
                             }
                         }
                         o.percent = Math.max(0, Math.min(1, x)).toFixed(2);
-                        o.during.call(o, o);
+                        o.during.call(o.config, o);
                         if (x >= 1) {
                             _.r.push(i);
                         }
@@ -352,16 +353,14 @@ Jelo.mold('Anim', function() {
          * @returns {Boolean} True if the supplied element is currently being animated. False otherwise.
          */
         ating              : function(el) {
-            return (el
-                ? (function() {
-                    for (var i = -1, l = _.a.length; ++i < l;) {
-                        if (el == _.a[i].me) {
-                            return true;
-                        }
+            return (el ? (function() {
+                for (var i = -1, l = _.a.length; ++i < l;) {
+                    if (el == _.a[i].me) {
+                        return true;
                     }
-                    return false;
-                })()
-                : !!_.a.length);
+                }
+                return false;
+            })() : !!_.a.length);
         },
         /**
          * Animation easing functions.

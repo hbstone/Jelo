@@ -1,159 +1,136 @@
-/**
- * @namespace <strong>Note: If you load Jelo.Core, every method of Jelo.Core is also available beneath Jelo itself.</strong>
- *            For example, the "each" function can be used as Jelo.Core.each(...) or Jelo.each(...)
- * @name Jelo
- */
-(function(J) {
-    
-    /** @private */
-    var D = window.document,
-        isReady = false,
-        onReady = [],
-        fireReady = function() {
-            isReady = true;
-            for (var i = 0; i < onReady.length; i++) {
-                try {
-                    onReady[i].call(window, J);
-                } catch (e) {
-                    if ('console' in window && 'log' in console) {
-                        console.log(e);
-                    }
-                }
-            }
-            onReady = [];
-        },
-        init = function() {
-            if (D.addEventListener) {
-                if ((/webkit/i).test(window.navigator.userAgent)) {
-                    var timer = setInterval(function() {
-                        if (/complete|loaded/i.test(D.readyState)) {
-                            clearInterval(timer);
-                            fireReady();
-                        }
-                    }, 20);
+(function(win, undef) {
+    if (!win.Jelo) {
+        var doc = win.document,
+            error,
+            errors = [],
+            isReady = false,
+            old = !!doc.attachEvent,
+            onReady = function() {
+                if (old) {
+                    doc.detachEvent('onreadystatechange', onReady);
                 } else {
-                    D.addEventListener("DOMContentLoaded", fireReady, false);
+                    doc.removeEventListener('DOMContentLoaded', onReady, false);
+                    win.removeEventListener('load', onReady, false);
                 }
-            } else {
-                var old = (typeof window.onload == "function")
-                    ? window.onload
-                    : J.emptyFn;
-                window.onload = function() {
-                    old();
-                    fireReady();
+                isReady = true;
+                while(fn.length) {
+                    try {
+                        fn.pop().call(win, win.Jelo);
+                    } catch(err) {
+                        Jelo.debug(err);
+                    }
+                }
+                fn = {
+                    push: function(fn) {
+                        fn.call(win, win.Jelo);
+                    }
                 };
-            }
-        };
-    
-    /**
-     * Reusable empty function. Performs no operation.
-     * 
-     * @function
-     * @memberOf Jelo
-     * @name emptyFn
-     */
-    J.emptyFn = function() {};
-    
-    /**
-     * Extends Jelo with the supplied module. Currently, multilevel namespaces are not an option (for example,
-     * Jelo.MyClass.MySubClass)
-     * 
-     * @param {String} name A namespace identifier for the new module.
-     * @param {Object} object The module itself, or an inline function which immediately returns an object.
-     * @param {Boolean} [overwrite=false] If a module exists with the same name, set this parameter to true to overwrite
-     *        the existing module.
-     * @function
-     * @memberOf Jelo
-     * @name mold
-     */
-    J.mold = function(n, o, v) {
-        if (!J[n] || v) {
-            J[n] = o;
-        }
-    };
-    
-    /**
-     * Loads remote Jelo modules or submodules, then performs code after the load is complete. Also usable as a generic
-     * "on DOM ready" function if no modules are supplied. Dependencies are handled automatically, and are not
-     * explicitly required. For example:
-     * 
-     * <pre>
-     *     Jelo.load('ui', function() { ... code requiring the ui module ... });
-     * </pre>
-     * 
-     * Since "ui" requires "core", core will automatically be included with this request. The result is exactly
-     * identical to the following example:
-     * 
-     * <pre>
-     *     Jelo.load('core', 'ui', function() { ... code requiring the ui module ... });
-     * </pre>
-     * 
-     * Available modules and submodules:
-     * 
-     * <pre>
-     * sizzle : the
-     * Sizzle selector library
-     *     core: Core, CSS, Dom, Event (requires: sizzle)
-     *     io: Ajax, JSON, Session
-     *     toolbox: Environment, Form
-     *     ui: Anim, Dragdrop (requires: core)
-     *     debug: Console (requires: core)
-     *     widget: the Widget base class
-     *     widgets: Panel (requires: io, ui, widget)
-     *     
-     *     all: Loads ALL modules in the correct order. This is the easiest way to use Jelo.
-     * </pre>
-     * 
-     * @param {String} [module] A module group or specific submodule to load, or "all" to load the whole library.
-     * @param {String} [...] Additional module groups to load.
-     * @param {Function} [fn] Code to execute after the given modules have completely loaded.
-     * @function
-     * @memberOf Jelo
-     * @name load
-     */
-    J.load = function() {
-        if (!isReady) {
-            var args = arguments;
-            setTimeout(function() {
-                J.load.apply(window, args);
-            }, 20);
-            return;
-        }
-        var a = [].slice.call(arguments, 0),
-            c = (typeof a[a.length - 1] == 'function')
-                ? a.pop()
-                : J.emptyFn,
-            m = a.join(',').toLowerCase(),
-            s = D.createElement('script');
-        if (m.length) {
-            s.src = 'http://fatfreejelo.com/load/' + m + '/';
-            if (s.readyState) {
-                s.onreadystatechange = function() {
-                    if ((/complete|loaded/).test(s.readyState)) {
-                        s.onreadystatechange = J.emptyFn;
-                        if (isReady) {
-                            c.call(window, J);
-                        } else {
-                            onReady.push(c);
+            },
+            fn = [];
+        win.Jelo = new function () {
+            this.constructor = arguments.callee;
+            this.undefined = undef;
+            this.emptyFn = function() {};
+            this._modules = {}; // hash for quick lookup
+            this.Version = {
+                atLeast: function(a, b, c) {
+                    a = a || 0;
+                    b = b || 0;
+                    c = c || 0;
+                    if (this.major > a) {
+                        return true;
+                    }
+                    if (this.major == a) {
+                        if (this.minor > b) {
+                            return true;
+                        }
+                        return ((this.minor == b) && (this.revision >= c));
+                    }
+                    return false;
+                },
+                toString: function() {
+                    return [this.major, this.minor, this.revision].join('.');
+                },
+                major: 3,
+                minor: 0, // prerelease
+                revision: 0
+            };
+            this.debugMode = false;
+            this.debug = function() { // default when console is not available
+                if ('console' in win) {
+                    if ('log' in console) {
+                        return function() {
+                            if (Jelo.debugMode) {
+                                if ('apply' in console.log) {
+                                    console.log.apply(console, arguments);
+                                } else {
+                                    // typeof IE's console.log is object, not function (no apply method)
+                                    console.log(arguments);
+                                }
+                            }
+                        };
+                    }
+                }
+                return function() {
+                    if (Jelo.debugMode) {
+                        for (var i = 0, l = arguments.length; i < l; i++) {
+                            alert(arguments[i]); // TODO: write to a div so this doesn't block
                         }
                     }
                 };
-            } else {
-                s.onload = function() {
-                    if (isReady) {
-                        c.call(window, J);
+            }();
+            this.load = function() {
+                var i,
+                    a = [].slice.call(arguments),
+                    f = a.pop(),
+                    l = a.length,
+                    xhr = new XMLHttpRequest(); // should have sent a poet
+                for (i = l; i--;) {
+                    if (Jelo._modules[a[i]]) {
+                        a.splice(i, 1);
                     } else {
-                        onReady.push(c);
+                        Jelo._modules[a[i]] = true;
                     }
-                };
-            }
-            D.documentElement.firstChild.appendChild(s);
+                }
+                if (a.length) {
+                    a = a.join(',');
+                    xhr.open('GET', 'http://fatfreejelo.com/load/' + a + '/', true);
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState == 4 && (/^2|3/).test(xhr.status)) {
+                            xhr.onreadystatechange = null;
+                            var s = doc.createElement('script');
+                            s.text = xhr.responseText;
+                            doc.documentElement.childNodes[0].appendChild(s);
+                            fn.push(f);
+                        }
+                    };
+                    xhr.send(null);
+                } else {
+                    fn.push(f);
+                }
+            };
+            this.mold = function(name, obj) {
+                try {
+                    var space = win.Jelo;
+                    name = name.replace(/[^0-9a-z\.]/gi, '').split('.');
+                    for (var i = 0, l = name.length - 1; i < l; i++) {
+                        if (!space[name[i]]) {
+                            space[name[i]] = {};
+                        }
+                        space = space[name[i]];
+                    }
+                    space[name[i]] = obj;
+                } catch(err) {
+                    throw new Error('Jelo.mold: Invalid name "' + name + '"');
+                }
+            };
+        };
+        if (old) {
+            doc.attachEvent('onreadystatechange', onReady);
         } else {
-            c.call(window, J);
+            doc.addEventListener('DOMContentLoaded', onReady, false);
+            win.addEventListener('load', onReady, false);
         }
-    };
-    
-    window.Jelo = J;
-    init();
-    
-})(window.Jelo || {});
+        // TODO: detect if Jelo itself was loaded dynamically, fire onReady manually
+    }
+}(this));

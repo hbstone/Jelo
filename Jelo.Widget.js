@@ -1,71 +1,71 @@
-/**
- * Creates a new basic Widget. This is typically only used as follows:
-<pre>
-    Jelo.mold('MyNewWidget', function() {
-        this.dom = Jelo.Dom.fromString('&lt;h1&gt;My New Widget&lt;/h1&gt;');
-    });
-    Jelo.MyNewWidget.prototype = new Jelo.Widget(); // inherit common functionality
-</pre>
- * Widgets have a private HTMLElement property, <code>dom</code>, that should be considered a "protected property" - that is, external objects should only be able to manipulate a Widget's dom by using that widget's public methods. Those public methods can then access <code>this.dom</code>. This is not a rule, but it is a strong suggestion.
- * @constructor
- */
-Jelo.Widget = function() {};
+/** @class Widget */
+Jelo.mold('Widget', function(opt) {
+	var self = this,
+		id = 'jelo-widget-' + Jelo.uID(),
+		append = function(where, what) {
+			if (where && what) {
+				if (typeof what == 'string') {
+					where.innerHTML = what;
+				} else {
+					Jelo.each(what, function(item) {
+						if (item.render) {
+							item.render(where); // widget may have special actions to do on render
+						} else {
+							where.appendChild(item);
+						}
+					});
+				}
+			}
+		},
+		config = opt || {};
+	
+	self.config = config; // so user functions can inspect creation object
+	self.dom = Jelo.Dom.fromString('<div class="-module"><div class="-inner"><div class="-hd"></div><div class="-bd"></div><div class="-ft"></div></div></div>').firstChild;
+	self.dom.Widget = self; // so user functions can elevate from the DOM node
+	self.dom.id = id; // unique id for this widget
+	
+	// convenience references
+	self.dom.head = $('.-inner .-hd', self.dom);
+	self.dom.body = $('.-inner .-bd', self.dom);
+	self.dom.foot = $('.-inner .-ft', self.dom);
+	
+	// handle user-supplied elements
+	append(self.dom.head, config.head);
+	append(self.dom.body, config.body);
+	append(self.dom.foot, config.foot);
+});
 Jelo.Widget.prototype = {
-    /** @private */
-    constructor : Jelo.Widget,
-    /**
-     * @private protected property
-     */
-    dom         : document.createElement('div'),
-    /**
-     * Not typically used, but may come in useful if your code needs to make sure it is acting on a Jelo.Widget.
-     * @constant
-     * @field
-     * @type Boolean
-     */
-    isWidget    : true,
-    /**
-     * Adds the element to the current page.
-     * @param {HTMLElement} [parent=document.body] The node to which this widget will be rendered.
-     * @function
-     */
-    render      : function(parent) {
-        if (this && this.dom) {
-            if (!parent || !parent.appendChild) {
-                parent = document.body;
-            }
-            parent.appendChild(this.dom);
-        }
-    },
-    /**
-     * Enables the widget. By default, it only removes the class "unselectable" so that you can decide what behavior that implies.
-     * @function
-     */
-    enable      : function() {
-        if (this.dom) {
-            Jelo.CSS.removeClass(this.dom, 'unselectable');
-        }
-    },
-    /**
-     * Disables the widget. By default, it only adds the class "unselectable" so that you can decide what behavior that implies.
-     * @function
-     */
-    disable     : function() {
-        if (this.dom) {
-            Jelo.CSS.addClass(this.dom, 'unselectable');
-        }
-    },
-    /**
-     * Attempts to remove this widget from the current page.
-     * @function
-     * @return {Boolean} True if successful, false if not. This return value can be safely ignored.
-     */
-    destroy     : function() {
-        try {
-            this.dom.parentNode.removeChild(this.dom);
-            return true;
-        } catch(err) {
-            return false;
-        }
-    }
+	destroy: function(completely) {
+		if (this.dom && this.dom.parentNode && this.dom.parentNode.removeChild) {
+			this.dom.parentNode.removeChild(this);
+			if (completely) {
+				this.dom = null;
+			}
+		}
+	},
+	render: function(target, clone) {
+		if (this.dom) {
+			if (!target || !target.appendChild) {
+				target = document.body;
+			}
+			target.appendChild(clone ? this.dom.cloneNode(true) : this.dom);
+		}
+	}
 };
+Jelo.Widget.extend = function(name, fn, proto) {
+	if (typeof name == 'string' && fn && name && name.length) {
+		Jelo.mold('Widget.' + name, function() {
+			Jelo.Widget.apply(this, arguments); // generic init
+			fn.apply(this, arguments);          // custom init
+		});
+		Jelo.Widget[name].prototype = new Jelo.Widget();
+		Jelo.Widget[name].prototype.constructor = Jelo.Widget[name]; // instanceof works for both Widget and Widget[name]
+		if (proto) {
+			for (var i in proto) {
+				if (proto.hasOwnProperty(i)) {
+					Jelo.Widget[name].prototype[i] = proto[i];
+				}
+			}
+		}
+	}
+}

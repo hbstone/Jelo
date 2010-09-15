@@ -1,17 +1,18 @@
 /**
- * @namespace Basic and support functions. <strong>Note: Every method of 
- * Jelo.Core is also available beneath Jelo itself.</strong> For example,
- * the "each" function can be used as Jelo.Core.each(...) or Jelo.each(...)
- * @name Jelo.Core
+ * @namespace Jelo.Core
  */
 Jelo.mold('Core', function() {
     
-    /** @private shortcut */
-    var undef;
-    
     /** @private */
+    var toCamelCache = {};
+    
+    /**
+     * Stores an untouched version of the native constructor before extending it.
+     * To get the clean (for example) Array, use _Array instead.
+     * Dean Edwards is a genius.
+     * @private
+     */
     function extend(c, fn) {
-        // stores an untouched version of the passed constructor, fn() can then safely modify the native object.
         var ns = document.createElement('iframe');
         ns.width = 0;
         ns.height = 0;
@@ -24,6 +25,74 @@ Jelo.mold('Core', function() {
         }
     }
     
+    // Array methods (uses native when available)
+    extend('Array', function() {
+        if (Array.prototype.indexOf == Jelo.undefined) {
+            /**
+             * @memberOf Array
+             * @param {Mixed} x The item to attempt to find.
+             * @returns {Number} The item's index if found, -1 otherwise.
+             */
+            Array.prototype.indexOf = function(k) {
+                var len = this.length;
+                for (var i = 0; i < len; i++) {
+                    if (this[i] == k) {
+                        return i;
+                    }
+                }
+                return -1;
+            };
+            Array.indexOf = Array.prototype.indexOf;
+        }
+        if (Array.prototype.lastIndexOf == Jelo.undefined) {
+            /**
+             * @memberOf Array
+             * @param {Mixed} x The item to attempt to find.
+             * @returns {Number} The index of the item's last occurrence if found, -1 otherwise.
+             */
+            Array.prototype.lastIndexOf = function(k) {
+                var len = this.length;
+                for (var i = len - 1; i > -1; i--) {
+                    if (this[i] == k) {
+                        return i;
+                    }
+                }
+                return -1;
+            };
+            Array.lastIndexOf = Array.prototype.lastIndexOf;
+        }
+        if (Array.prototype.find == Jelo.undefined) {
+            /**
+             * @memberOf Array
+             * @param {Mixed} x The item to attempt to find, or a RegExp to match.
+             * @returns {Array|Boolean} An array of indeces at which the item was found, or at which the RegExp tested
+             *          positive. Boolean false if no element matched.
+             */
+            Array.prototype.find = function(k) {
+                var res = [];
+                var len = this.length;
+                for (var i = 0; i < len; i++) {
+                    if ((k.test && k.test(this[i])) || k === this[i]) {
+                        res.push(i);
+                    }
+                }
+                return !!res.length && res;
+            };
+            Array.find = Array.prototype.find;
+        }
+        if (Array.prototype.shuffle == Jelo.undefined) {
+            /**
+             * @memberOf Array
+             * @returns {Array} The array, randomized.
+             */
+            Array.prototype.shuffle = function() {
+                for (var j, x, i = this.length; i; j = parseInt(Math.random() * i, 10), x = this[--i], this[i] = this[j], this[j] = x) {}
+                return this;
+            };
+            Array.shuffle = Array.prototype.shuffle;
+        }
+    });
+
     /** @private */
     function toHex(n) {
         var chr = "0123456789ABCDEF";
@@ -42,12 +111,12 @@ Jelo.mold('Core', function() {
     
     /** @private */
     function rep(s, r, str) {
-        var tmp_arr = [];
-        tmp_arr = str.split(s);
-        return tmp_arr.join(r);
+        var arr = [];
+        arr = str.split(s);
+        return arr.join(r);
     }
-
-(function(f) {
+    
+    (function(f) {
         /**
          * @function
          * @memberOf _global_
@@ -70,85 +139,17 @@ Jelo.mold('Core', function() {
         window.setInterval = f(window.setInterval);
     })(function(f) {
         return function(c, t) {
-            var a = [].slice.call(arguments, 2);
+            var a = [].slice.call(arguments, 2),
+                n = f.name || 'setTimeout or setInterval';
             if (typeof c == 'string') {
-                c = f.name || 'setTimeout or setInterval';
-                throw new Error('The first argument to ' + c + ' should be a Function, not a String.');
+                throw new TypeError('Syntax: ' + n + '(Function, Number[, args, ...])');
             }
             return f(function() {
                 c.apply(this, a);
             }, t);
         };
     });
-    
-    // Array methods (uses native when available)
-    extend('Array', function() {
-        if (Array.prototype.indexOf == undef) {
-            /**
-             * @memberOf Array
-             * @param {Mixed} x The item to attempt to find.
-             * @returns {Number} The item's index if found, -1 otherwise.
-             */
-            Array.prototype.indexOf = function(k) {
-                var len = this.length;
-                for (var i = 0; i < len; i++) {
-                    if (this[i] == k) {
-                        return i;
-                    }
-                }
-                return -1;
-            };
-            Array.indexOf = Array.prototype.indexOf;
-        }
-        if (Array.prototype.lastIndexOf == undef) {
-            /**
-             * @memberOf Array
-             * @param {Mixed} x The item to attempt to find.
-             * @returns {Number} The index of the item's last occurrence if found, -1 otherwise.
-             */
-            Array.prototype.lastIndexOf = function(k) {
-                var len = this.length;
-                for (var i = len - 1; i > -1; i--) {
-                    if (this[i] == k) {
-                        return i;
-                    }
-                }
-                return -1;
-            };
-            Array.lastIndexOf = Array.prototype.lastIndexOf;
-        }
-        if (Array.prototype.find == undef) {
-            /**
-             * @memberOf Array
-             * @param {Mixed} x The item to attempt to find, or a RegExp to match.
-             * @returns {Array|Boolean} An array of indeces at which the item was found, or at which the RegExp tested
-             *          positive. Boolean false if no element matched.
-             */
-            Array.prototype.find = function(k) {
-                var res = [];
-                var len = this.length;
-                for (var i = 0; i < len; i++) {
-                    if ((k.test && k.test(this[i])) || k === this[i]) {
-                        res.push(i);
-                    }
-                }
-                return !!res.length && res;
-            };
-            Array.find = Array.prototype.find;
-        }
-        if (Array.prototype.shuffle == undef) {
-            /**
-             * @memberOf Array
-             * @returns {Array} The array, randomized.
-             */
-            Array.prototype.shuffle = function() {
-                for (var j, x, i = this.length; i; j = parseInt(Math.random() * i, 10), x = this[--i], this[i] = this[j], this[j] = x) {}
-                return this;
-            };
-            Array.shuffle = Array.prototype.shuffle;
-        }
-    });
-    
+        
     /** @scope Jelo.Core */
     return {
         /**
@@ -162,28 +163,23 @@ Jelo.mold('Core', function() {
          * @param {Object} scope An optional execution context in which to run your function.
 <pre>
     Jelo.each(['A', 'B', 'C'], function(item, index, arr) {
-        alert('Item ' + item + ' is at index ' + index); // "Item A is at index 0", etc.
-        alert('Arr has ' + arr.length + ' total items.'); // "Arr has 3 total items"
+        alert('Item ' + item + ' is at index ' + index);
+        // Pass 1: "Item A is at index 0"
+        // Pass 2: "Item B is at index 1"
+        // Pass 3: "Item C is at index 2"
     });
-    var letterB = Jelo.each(['A', 'B', 'C'], function(item, index, arr) {
-    	return item != 'B'; // returns the Number 1 ('C' will not be processed)
+    var notLetterA = Jelo.each(['A', 'B', 'C'], function(item, index, arr) {
+        return item == 'A'; // notLetterA == 1 ('C' will not even be checked)
     });
 </pre>
-		 * @returns {Mixed} The index of the first loop that returned false, otherwise true. 
-		 * <strong>NOTE:</strong> The "true" return value is deprecated, soon the number 
-		 * <strong>-1</strong> will be returned for consistency with other Array methods.
+         * @returns {Mixed} The index or key of the first loop that returns Boolean false, otherwise -1.
          */
-        each         : function(a, f, s) {
-            var n, i,
-                l = a.length;
-            if (l != undef) {
-                for (i = 0; i < l; i++) {
-                    if (f.call(s || a[i], a[i], i, a) === false) {
-                        // NOTE: if a[i] is a string, "this" will be an equivalent String object.
-                        return i;
-                    }
-                }
-            } else {
+        each : function(a, f, s) {
+            if (!Jelo.Core.isIterable(a)) {
+                a = [a];
+            }
+            var i, n, l = a.length;
+            if (l == Jelo.undefined) {
                 for (n in a) {
                     if (!a.hasOwnProperty || a.hasOwnProperty(n)) {
                         if (f.call(s || a[n], a[n], n, a) === false) {
@@ -191,17 +187,25 @@ Jelo.mold('Core', function() {
                         }
                     }
                 }
+            } else {
+                for (i = 0; i < l; i++) {
+                    if (f.call(s || a[i], a[i], i, a) === false) {
+                        // NOTE: if a[i] is a string, "this" will be an equivalent (not identical) String Object.
+                        return i;
+                    }
+                }
             }
-            return true; // TODO: return -1
+            return -1;
         },
         /**
          * @function
          * @param {Mixed} a An object to test.
-         * @return {Boolean} True if the object is likely enumerable, meaning it seems to be
-         * an Array or Array-like object.
+         * @return {Boolean} True if the object is likely iterable, meaning it seems to be
+         * an Array or Array-like object usable in "for" loops and similar operations. For 
+         * practical purposes, this function returns false for Strings.
          */
-        isEnumerable : function(a) {
-            return !!a && (typeof a.length == 'number') && (typeof a != 'string');
+        isIterable : function(a) {
+            return !!a && (a != window) && (typeof a.length == 'number') && (typeof a != 'string');
         },
         /**
          * Can be used to create unique IDs or global counters. Every time this function is called, a number will be
@@ -211,7 +215,7 @@ Jelo.mold('Core', function() {
          * @function
          * @return {Number} An autoincrementing positive integer. The first number returned is 1.
          */
-        uID          : function() {
+        uID : function() {
             var id = 1; // initial value
             return function() {
                 return id++;
@@ -224,10 +228,13 @@ Jelo.mold('Core', function() {
          * @param {String} str A value such as 'margin-left';
          * @returns {String} A value such as 'marginLeft';
          */
-        toCamel      : function(str) {
-            return str.replace(/-(.)/g, function(m, l) {
-                return l.toUpperCase();
-            });
+        toCamel : function(str) {
+            if (!toCamelCache[str]) {
+                toCamelCache[str] = str.replace(/-(\w)/g, function(x, y) {
+                    return y.toUpperCase();
+                });
+            }
+            return toCamelCache[str];
         },
         
         /**
@@ -237,7 +244,7 @@ Jelo.mold('Core', function() {
          * @param {String} hex A value such as "#0080FF"
          * @returns {String} A value such as "0080FF"
          */
-        cutHexHash   : function(h) {
+        cutHexHash : function(h) {
             return (h.charAt(0) == "#") ? h.substring(1) : h;
         },
         /**
@@ -246,7 +253,7 @@ Jelo.mold('Core', function() {
          * @param {String} hex A value such as "#9966CC"
          * @returns {String} For the above example, "99"
          */
-        hexToR       : function(h) {
+        hexToR : function(h) {
             return parseInt(this.cutHexHash(h).substring(0, 2), 16);
         },
         /**
@@ -255,7 +262,7 @@ Jelo.mold('Core', function() {
          * @param {String} hex A value such as "#9966CC"
          * @returns {String} For the above example, "66"
          */
-        hexToG       : function(h) {
+        hexToG : function(h) {
             return parseInt(this.cutHexHash(h).substring(2, 4), 16);
         },
         /**
@@ -264,7 +271,7 @@ Jelo.mold('Core', function() {
          * @param {String} hex A value such as "#9966CC"
          * @returns {String} For the above example, "CC"
          */
-        hexToB       : function(h) {
+        hexToB : function(h) {
             return parseInt(this.cutHexHash(h).substring(4, 6), 16);
         },
         /**
@@ -273,7 +280,7 @@ Jelo.mold('Core', function() {
          * @param {String} hex A value such as "#9966CC"
          * @returns {Array} For the above example, ["99", "66", "CC"]
          */
-        hexToRGB     : function(h) {
+        hexToRGB : function(h) {
             return [this.hexToR(h), this.hexToG(h), this.hexToB(h)];
         },
         
@@ -283,7 +290,7 @@ Jelo.mold('Core', function() {
          * @param {String} hex A value such as "rgb(0, 128, 255)"
          * @returns {Array} For the above example, [0, 128, 255]
          */
-        rgbToArray   : function(s) {
+        rgbToArray : function(s) {
             if (typeof s == 'string') {
                 try {
                     var sub = s.split(/\D/g),
@@ -308,7 +315,7 @@ Jelo.mold('Core', function() {
          * @param {String} hex A value such as "rgb(0, 128, 255)"
          * @returns {Array} For the above example, "#0080FF"
          */
-        rgbToHex     : function(s) {
+        rgbToHex : function(s) {
             if (typeof s == 'string') {
                 try {
                     var a = Jelo.Core.rgbToArray(s);
@@ -327,9 +334,9 @@ Jelo.mold('Core', function() {
          * @param {String} str
          * @returns {String}
          */
-        urldecode    : function(str) {
+        urldecode : function(str) {
             var h = {}, // histogram
-            	ret = str.toString();
+                ret = str.toString();
             h["'"] = '%27';
             h['('] = '%28';
             h[')'] = '%29';
@@ -354,7 +361,7 @@ Jelo.mold('Core', function() {
          * @param {String} str
          * @returns {String}
          */
-        urlencode    : function(str) {
+        urlencode : function(str) {
             var h = {}, // histogram
                 tmp_arr = [],
                 ret = str.toString();
@@ -381,7 +388,7 @@ Jelo.mold('Core', function() {
          * Alias for {@link Jelo.Core.urldecode}
          * @function
          */
-        urlDecode    : function(str) {
+        urlDecode : function(str) {
             return this.urldecode(str);
         },
         
@@ -389,16 +396,14 @@ Jelo.mold('Core', function() {
          * Alias for {@link Jelo.Core.urlencode}
          * @function
          */
-        urlEncode    : function(str) {
+        urlEncode : function(str) {
             return this.urlencode(str);
         }
-        
     };
-    
 }());
 /** @ignore */
 (function() {
-    Jelo.Core.each(Jelo.Core, function(item, index) {
-        Jelo[index] = Jelo.Core[index];
-    });
-})();
+    for (var i in Jelo.Core) {
+        Jelo[i] = Jelo.Core[i];
+    }
+}());
