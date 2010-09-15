@@ -137,7 +137,7 @@ Jelo.mold('Dom', function () {
                 node.id = o.id || '';
                 node.className = o.cls || '';
                 node.innerHTML = o.html || '';
-                if (Jelo.isEnumerable(o.children)) {
+                if (Jelo.isIterable(o.children)) {
                     var l = o.children.length;
                     for (var i = 0; i < l; i++) {
                         node.appendChild(Jelo.Dom.create(o.children[i]));
@@ -152,7 +152,7 @@ Jelo.mold('Dom', function () {
          * @param {HTMLElement|Array} node One or more elements to attempt to remove.
          */
         destroy: function (el) {
-            if (Jelo.isEnumerable(el)) {
+            if (Jelo.isIterable(el)) {
                 for (var i = 0; i < l; i++) {
                     Jelo.Dom.destroy(el[i]);
                 }
@@ -172,7 +172,7 @@ Jelo.mold('Dom', function () {
             if (attr == 'class') {
                 attr = 'className';
             }
-            if (Jelo.isEnumerable(el)) {
+            if (Jelo.isIterable(el)) {
                 var attrs = [],
                     l = el.length;
                 for (var i = 0; i < l; i++) {
@@ -192,7 +192,7 @@ Jelo.mold('Dom', function () {
             if (attr == 'class') {
                 attr = 'className';
             }
-            if (Jelo.isEnumerable(el)) {
+            if (Jelo.isIterable(el)) {
                 for (var i = 0, l = el.length; i < l; i++) {
                     el[i][attr] = val || '';
                 }
@@ -207,7 +207,7 @@ Jelo.mold('Dom', function () {
          * @return {Boolean} True if the supplied element matches the supplied selector.
          */
         is: function (el, s) {
-            var arr = Jelo.isEnumerable(el),
+            var arr = Jelo.isIterable(el),
                 result = sizzle.filter(s, arr ? el : [el]);
             return arr ? (result.length == el.length) : (result.length > 0);
         },
