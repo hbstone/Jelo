@@ -1,8 +1,9 @@
 /*!
-  Sizzle CSS Selector Engine - v1.0
-   Copyright 2009, The Dojo Foundation
-   Released under the MIT, BSD, and GPL Licenses.
-   More information: http://sizzlejs.com/
+ *   Sizzle CSS Selector Engine - v1.0
+ *      Copyright 2009, The Dojo Foundation
+ *         Released under the MIT, BSD, and GPL Licenses.
+ *            More information: http://sizzlejs.com/
+ *
  */
 (function (global) {
     var chunker = /((?:\((?:\([^()]+\)|[^()]+)+\)|\[(?:\[[^\[\]]*\]|['"][^'"]*['"]|[^\[\]'"]+)+\]|\\.|[^ >+~,(\[\\]+)+|[>+~])(\s*,\s*)?((?:.|\r|\n)*)/g,
