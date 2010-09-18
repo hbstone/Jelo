@@ -23,21 +23,33 @@ Jelo.mold('DragDrop', function() {
                 var width = dragTarget.offsetWidth,
                     left = parseInt(Jelo.css(dragTarget, 'border-left-width'), 10),
                     right = parseInt(Jelo.css(dragTarget, 'border-right-width'), 10);
-                Jelo.css(this, ['width', 'z-index', 'margin', 'position'], [(width - left - right) + 'px', maxZ(), '0px', 'absolute']);
+                Jelo.css(this, {
+                    width: (width - left - right) + 'px',
+                    zIndex: maxZ(),
+                    margin: '0px',
+                    position: 'absolute'
+                });
                 this._dragOriginalParent = this.parentNode;
                 document.body.appendChild(this);
             },
             drag : function(e) {
                 var x = parseInt(e.clientX, 10) + 4,
                     y = parseInt(e.clientY, 10) + 8;
-                Jelo.css(this, ['top', 'left'], [y + 'px', x + 'px']);
+                Jelo.css(this, {
+                    top: y + 'px',
+                    left: x + 'px'
+                });
             },
             drop: function(e) {
                 setTimeout(function(self) {
                     var target = e.dragTarget;
                     self.appendChild(target);
                     if ((/absolute/).test(Jelo.css(target, 'position'))) {
-                        Jelo.css(target, ['position', 'top', 'left'], ['relative', '0px', '0px']);
+                        Jelo.css(target, {
+                            position: 'relative',
+                            top: '0px',
+                            left: '0px'
+                        });
                     }
                 }, 10, this);
             }
