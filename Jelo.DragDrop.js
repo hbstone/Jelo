@@ -33,8 +33,8 @@ Jelo.mold('DragDrop', function() {
                 document.body.appendChild(this);
             },
             drag : function(e) {
-                var x = parseInt(e.clientX, 10) + 4,
-                    y = parseInt(e.clientY, 10) + 8;
+                var x = parseInt(e.pageX, 10) + 4,
+                    y = parseInt(e.pageY, 10) + 8;
                 Jelo.css(this, {
                     top: y + 'px',
                     left: x + 'px'
@@ -42,14 +42,17 @@ Jelo.mold('DragDrop', function() {
             },
             drop: function(e) {
                 setTimeout(function(self) {
-                    var target = e.dragTarget;
-                    self.appendChild(target);
-                    if ((/absolute/).test(Jelo.css(target, 'position'))) {
-                        Jelo.css(target, {
-                            position: 'relative',
-                            top: '0px',
-                            left: '0px'
-                        });
+                    if (!e.handled) {
+                        e.handled = true;
+                        var target = e.dragTarget;
+                        self.appendChild(target);
+                        if ((/absolute/).test(Jelo.css(target, 'position'))) {
+                            Jelo.css(target, {
+                                position: 'relative',
+                                top: '0px',
+                                left: '0px'
+                            });
+                        }
                     }
                 }, 10, this);
             }
