@@ -66,7 +66,7 @@ Jelo.mold('DragDrop', function() {
             dragTarget = this._dragTarget;
             Jelo.on(doc, 'mousemove', move);
             Jelo.on(doc, 'mouseup', up);
-            origin = [e.clientX, e.clientY];
+            origin = [e.pageX, e.pageY];
             dragPastThreshold = false;
             dragFirstTime = true;
         }
@@ -87,7 +87,7 @@ Jelo.mold('DragDrop', function() {
             }
             dragTarget._dragMouseMove.call(dragTarget, e);
         } else {
-            var hypotenuse = Math.sqrt(Math.pow(e.clientX - origin[0], 2) + Math.pow(e.clientY - origin[1], 2)).toFixed(0);
+            var hypotenuse = Math.sqrt(Math.pow(e.pageX - origin[0], 2) + Math.pow(e.pageY - origin[1], 2)).toFixed(0);
             if (hypotenuse >= threshold) {
                 dragPastThreshold = true;
             }
@@ -119,8 +119,8 @@ Jelo.mold('DragDrop', function() {
             var target = this;
             
             // all normal event properties and methods are available
-            var x = event.clientX;
-            var y = event.clientY;
+            var x = event.pageX;
+            var y = event.pageY;
             
             // this will avoid executing mousedown events on this element or its ancestors
             event.preventDefault();
@@ -197,8 +197,8 @@ Jelo.mold('DragDrop', function() {
             var target = event.dragTarget;
             
             // all normal event properties and methods are available
-            var x = event.clientX;
-            var y = event.clientY;
+            var x = event.pageX;
+            var y = event.pageY;
             event.stopPropagation();
         }
     });
