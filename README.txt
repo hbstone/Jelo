@@ -15,8 +15,4 @@
  * Website: http://oocss.org/
  * License: http://creativecommons.org/licenses/BSD/
  * 
- * Silk Icons, Copyright 2006 Mark James
- * Website: http://famfamfam.com/
- * License: http://creativecommons.org/licenses/by/3.0/
- * 
  */
