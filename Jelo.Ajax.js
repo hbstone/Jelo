@@ -147,6 +147,7 @@ Jelo.mold('Ajax', function() {
                     //u += ((/\?/).test(u) ? '&' : '?') + '_now=' + (new Date()).getTime();
                     x.open(m, u, true);
                     x.onreadystatechange = orsc;
+                    x.setRequestHeader("User-Agent", window.navigator.userAgent + ' Jelo/' + Jelo.Version.toString());
                     x.setRequestHeader("X-Requested-With", 'XMLHttpRequest');
                     x.send(null);
                     break;
@@ -155,10 +156,11 @@ Jelo.mold('Ajax', function() {
                     q = q.split("?", 2)[1];
                     x.open(m, u, true);
                     x.onreadystatechange = orsc;
+                    x.setRequestHeader("User-Agent", window.navigator.userAgent + ' Jelo/' + Jelo.Version.toString());
                     x.setRequestHeader("X-Requested-With", 'XMLHttpRequest');
                     x.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                    x.setRequestHeader("Content-Length", q.length);
-                    x.setRequestHeader("Connection", "close");
+                    //x.setRequestHeader("Content-Length", q.length);
+                    //x.setRequestHeader("Connection", "close");
                     x.send(q);
                     break;
                 default :
