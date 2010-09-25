@@ -9,7 +9,35 @@ Jelo.mold('Ajax', function() {
         getXHR = function() {
             return ('XMLHttpRequest' in window) ? new XMLHttpRequest() : (('ActiveXObject' in window) ? new ActiveXObject("Msxml2.XMLHTTP") : null);
         },
-        X = getXHR();
+        X = getXHR(),
+        loadRemote = function(type, url, fn) {
+            var style = (type == 'css');
+            if (typeof url == 'string') {
+                var s = D.createElement(style ? 'link' : 'script'),
+                    h = D.documentElement && D.documentElement.firstChild;
+                if (typeof fn == 'function') {
+                    if (s.readyState) {
+                        s.onreadystatechange = function() {
+                            if ((/loaded|complete/).test(s.readyState)) {
+                                s.onreadystatechange = null;
+                                fn.call(s, s);
+                            }
+                        };
+                    } else {
+                        s.onload = function() {
+                            s.onload = null;
+                            fn.call(s, s);
+                        };
+                    }
+                }
+                s.type = 'text/' + type;
+                s[style ? 'href' : 'src'] = url;
+                if (style) {
+                    s.rel = 'stylesheet';
+                }
+                h.insertBefore(s, h.firstChild);
+            }
+        };
     
     /** @scope Jelo.Ajax */
     return {
@@ -49,6 +77,9 @@ Jelo.mold('Ajax', function() {
                 });
             }
         },
+        loadStylesheet : function(url, fn) {
+            loadRemote('css', url, fn);
+        },
         /**
          * Asynchronously loads a script from any source, local or remote to the page's server.
          * @function
@@ -56,28 +87,7 @@ Jelo.mold('Ajax', function() {
          * @param {Function} [fn] A callback function to execute once the script is completely finished loading.
          */
         loadScript : function(url, fn) {
-            if (typeof url == 'string') {
-                var s = D.createElement('script'),
-                    h = D.documentElement;
-                if (typeof fn == 'function') {
-                    if (s.readyState) {
-                        s.onreadystatechange = function() {
-                            if ((/loaded|complete/).test(s.readyState)) {
-                                s.onreadystatechange = null;
-                                fn();
-                            }
-                        };
-                    } else {
-                        s.onload = function() {
-                            s.onload = null;
-                            fn();
-                        };
-                    }
-                }
-                s.type = 'text/javascript';
-                s.src = url;
-                h.insertBefore(s, h.firstChild);
-            }
+            loadRemote('javascript', url, fn);
         },
         /**
          * @function
