@@ -4,30 +4,20 @@ Jelo.mold('CSS', function() {
         clsCache = {};
     /** @private */
     function killAuto(e, p) {
-        var val;
+        var val = 'auto';
         switch(p) {
             case 'top': // fall through
             case 'right': // fall through
             case 'bottom': // fall through
-            case 'left':
-                if ((/absolute|fixed/).test(getStyle(e, 'position'))) { // TODO: test with fixed element, may need in relation to screen coords instead
-                    val = (e['offset' + p.replace(/(^.)/, function(x, y) {
-                        return y.toUpperCase();
-                    })] || '0') + 'px';
-                } else {
-                    val = '0px';
-                }
-                break;
+            case 'left': // fall through
             case 'width': // fall through
             case 'height':
                 val = (e['offset' + p.replace(/(^.)/, function(x, y) {
                     return y.toUpperCase();
-                })] || '0') + 'px';
+                })] || 0);
                 break;
-            default:
-                val = '';
         }
-        return val;
+        return isNaN(val) ? val : (val + 'px');
     }
     /** @private */
     function propColor(p) {
@@ -145,14 +135,12 @@ Jelo.mold('CSS', function() {
             var vals = [], module = C.CSS;
             if (C.isIterable(el)) { // can't always jump into Jelo.each because the return type changes
                 C.each(el, function(item) {
-                    Jelo.debug(item, prop);
                     vals.push(Jelo.CSS.getStyle(item, prop));
                 });
                 return vals; // Array
             } 
             if (C.isIterable(prop)) {
                 C.each(prop, function(item) {
-                    Jelo.debug(el, item);
                     vals.push(Jelo.CSS.getStyle(el, item));
                 });
                 return vals; // Array
