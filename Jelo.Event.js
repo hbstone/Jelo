@@ -153,6 +153,7 @@ Jelo.mold('Event', function() {
             'mouseleave' : function(fn, useCapture, isListening) {
                 var f = mouseEnter(fn);
                 isListening ? Jelo.Event.add(this, 'mouseout', f, useCapture, false) : Jelo.Event.remove(this, 'mouseout', f, useCapture, false);
+                f = null;
             }
         };
     /** @scope Jelo.Event */
