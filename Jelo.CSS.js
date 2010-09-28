@@ -47,7 +47,7 @@ Jelo.mold('CSS', function() {
                         }
                 }
             }
-            if (val == 'auto') { // TODO: other properties that may return auto
+            if (val == 'auto') {
                 val = killAuto(e, p);
             }
             val = (e.style[p] || val || '').toString();
@@ -70,7 +70,7 @@ Jelo.mold('CSS', function() {
                     p = 'styleFloat';
                 }
                 val = e.currentStyle[p];
-                if (val == 'auto') { // TODO: other properties that may return auto
+                if (val == 'auto') {
                     val = killAuto(e, p);
                 }
             }
