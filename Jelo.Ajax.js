@@ -6,6 +6,7 @@ Jelo.mold('Ajax', function() {
     
     /** @private */
     var D = window.document,
+        cache = {},
         getXHR = function() {
             return ('XMLHttpRequest' in window) ? new XMLHttpRequest() : (('ActiveXObject' in window) ? new ActiveXObject("Msxml2.XMLHTTP") : null);
         },
@@ -136,29 +137,38 @@ Jelo.mold('Ajax', function() {
                             }
                         }
                         return q;
-                    }(q || '');
+                    }(q || ''),
+                uCache = m + u + q,
+                ua = window.navigator.userAgent + ' Jelo/' + Jelo.Version.toString();
+            if (o.cache && cache[uCache]) {
+                x = cache[uCache];
+                fs.call(x, x, o);
+                fc.call(x, x, o);
+                return;
+            }
             if (!(/0|4/).test(x.readyState)) {
                 x.abort();
             }
             var orsc = function() {
-                if (x.readyState == 4) {
-                    if ((/^2/).test(x.status)) {
+                if ((/4/).test(x.readyState)) {
+                    if (!(/^[4-5]/).test(x.status)) {
                         fs.call(x, x, o);
                     } else {
                         ff.call(x, x, o);
                     }
                     fc.call(x, x, o);
+                    if (o.cache) {
+                        cache[uCache] = x;
+                    }
                 }
             };
             switch (m) {
                 case "DELETE":
                 case "GET" :
                     u += q;
-                    //u += ((/\?/).test(u) ? '&' : '?') + '_now=' + (new Date()).getTime();
                     x.open(m, u, true);
                     x.onreadystatechange = orsc;
-                    x.setRequestHeader("User-Agent", window.navigator.userAgent + ' Jelo/' + Jelo.Version.toString());
-                    x.setRequestHeader("X-Requested-With", 'XMLHttpRequest');
+                    x.setRequestHeader("X-Requested-With", 'XMLHttpRequest Jelo/' + Jelo.Version.toString());
                     x.send(null);
                     break;
                 case "POST" :
@@ -166,11 +176,8 @@ Jelo.mold('Ajax', function() {
                     q = q.split("?", 2)[1];
                     x.open(m, u, true);
                     x.onreadystatechange = orsc;
-                    x.setRequestHeader("User-Agent", window.navigator.userAgent + ' Jelo/' + Jelo.Version.toString());
-                    x.setRequestHeader("X-Requested-With", 'XMLHttpRequest');
+                    x.setRequestHeader("X-Requested-With", 'XMLHttpRequest Jelo/' + Jelo.Version.toString());
                     x.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                    //x.setRequestHeader("Content-Length", q.length);
-                    //x.setRequestHeader("Connection", "close");
                     x.send(q);
                     break;
                 default :
