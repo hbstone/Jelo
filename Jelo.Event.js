@@ -110,9 +110,22 @@ Jelo.mold('Event', function() {
         
     }
     /** @private */
+    function mouseWheel(fn) {
+        var key = getGUID(fn),
+            f = hash[key];
+        if (!f) {
+            f = hash[key] = function(ev) {
+                ev.wheelDelta = -(ev.detail);
+                fn.call(this, ev);
+                ev.wheelDelta = null;
+            };
+        }
+        return f;
+    }
+    /** @private */
     function mouseEnter(fn) {
-        var key = getGUID(fn);
-        var f = hash[key];
+        var key = getGUID(fn),
+            f = hash[key];
         if (!f) {
             f = hash[key] = function(ev) {
                 var relatedTarget = ev.relatedTarget;
@@ -154,6 +167,16 @@ Jelo.mold('Event', function() {
                 var f = mouseEnter(fn);
                 isListening ? Jelo.Event.add(this, 'mouseout', f, useCapture, false) : Jelo.Event.remove(this, 'mouseout', f, useCapture, false);
                 f = null;
+            },
+            'mousewheel' : function(fn, useCapture, isListening) {
+                var ev = 'mousewheel',
+                    f = fn,
+                    ua = navigator.userAgent;
+                if ((/gecko/i).test(ua) && !(/khtml/i).test(ua)) {
+                    ev = 'DOMMouseScroll';
+                    f = mouseWheel(fn);
+                }
+                isListening ? Jelo.Event.add(this, 'mousewheel', f, useCapture, false) : Jelo.Event.remove(this, 'mousewheel', f, useCapture, false);
             }
         };
     /** @scope Jelo.Event */
