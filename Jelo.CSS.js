@@ -28,12 +28,23 @@ Jelo.mold('CSS', function() {
             var c, val = '';
             if (e && p) {
                 p = C.toCamel(p);
-                if (p == 'float') {
-                    p = 'cssFloat';
-                }
-                c = d(e, '');
-                if (c && c[p]) {
-                    val = c[p];
+                switch(p) {
+                    case 'backgroundPositionX': // fall through
+                    case 'backgroundPositionY':
+                        try {
+                            val = getStyle(e, 'background-position').split(' ')[(/X/).test(p) ? 0 : 1];
+                        } catch(err) {
+                            val = '0px';
+                        }
+                        break;
+                    default:
+                        if (p == 'float') {
+                            p = 'cssFloat';
+                        }
+                        c = d(e, '');
+                        if (c && c[p]) {
+                            val = c[p];
+                        }
                 }
             }
             if (val == 'auto') { // TODO: other properties that may return auto
