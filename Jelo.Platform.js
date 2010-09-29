@@ -1,30 +1,41 @@
 Jelo.mold('Platform', function(window) {
+    var ua = window.navigator.userAgent.toLowerCase();
     function create(el) {
         return window.document.createElement(el);
+    }
+    function match(regex) {
+        var t = regex.test(ua),
+            m = ua.match(regex);
+        return t ? (m[1] || m[0]) : 0;
     }
     return {
         Is: {
             
             // browsers
-            ie: false,
-            firefox: false,
-            chrome: false,
+            ie: match(/msie (\d+(\.\d+)?)/),
+            firefox: match(/firefox\/(\d+(\.\d+)?)/),
+            chrome: match(/chrome\/(\d+(\.\d+)?)/),
+            safari: match(/safari\/(\d+(\.\d+)?)/),
+            opera: match(/opera\/(\d+(\.\d+)?)/),
             
             // rendering engines
-            trident: false,
-            gecko: false,
-            safari: false,
-            webkit: false,
+            trident: match(/msie/) ? match(/trident\/(\d+(\.\d+)?)/) || (match(/msie (\d+(\.\d+))/) - 3).toFixed(1) : 0,
+            gecko: match(/gecko\/(\d+)/),
+            webkit: match(/webkit|khtml\/(\d+(\.\d+)?)/),
             
             // desktop runtimes
-            air: false,
-            titanium: false,
+            air: match(/adobeair\/(\d+(\.\d+)?)/),
+            titanium: match(/titanium\/(\d+(\.\d+)?)/),
+            rhino: match(/rhino/),
             
             // operating systems
-            windows: false,
-            mac: false,
-            linux: false,
-            unix: false,
+            windows: match(/(win)[d3]/), // windows, win32
+            mac: match(/(mac)[i ]/), // macintosh, macintel, mac os x
+            linux: match(/linux/),
+            unix: match(/unix/), // TODO: revise this, probably not accurate
+            
+            // mobile, currently also matches tablets and consoles
+            mobile: match(/android|avantgo|blackberry|brew|docomo|htc|ipad|iphone|ipod|kindle|minimo|opera mini|midp|mmp|mobile|netfront|nokia|nook|opwv|palmos|palm|pda|phone|playstation|ppc|proxinet|samsung|sonyeric|symbian|tablet|vodafone|wap|wii|windows ce|xbox/),
             
             // so I don't need to worry about extra trailing commas
             nothing: false
