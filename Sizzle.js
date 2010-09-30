@@ -811,4 +811,4 @@
         return Sizzle.filter(later, tmpSet);
     };
     global.Sizzle = Sizzle;
-})(Jelo || window);
+}(window && window.Jelo));
