@@ -149,4 +149,4 @@
             throw new SyntaxError('JSON.parse');
         };
     }
-}(this));
+}(window && window.Jelo));
