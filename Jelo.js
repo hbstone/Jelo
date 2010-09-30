@@ -1,5 +1,6 @@
-(function(win, undef, dbg, dfn, rdy) {
-    var doc = win.document,
+(function(undef, dbg, dfn, rdy) {
+    var win = window,
+        doc = win.document,
         old = !!doc.attachEvent,
         onReady = function() {
             win.Jelo.isReady = true;
@@ -88,26 +89,28 @@
                 l = a.length,
                 xhr = new XMLHttpRequest(); // should have sent a poet
             for (i = l; i--;) {
-                if (Jelo._modules[a[i]]) {
+                if (this._modules[a[i]]) {
                     a.splice(i, 1);
                 } else {
-                    Jelo._modules[a[i]] = true;
+                    this._modules[a[i]] = true;
                 }
             }
             if (a.length) {
-                a = encodeURIComponent(a.join(','));
-                xhr.open('GET', 'http://fatfreejelo.com/load/' + a + '/', true);
-                xhr.setRequestHeader('Jelo/' + this.Version + ' XMLHttpRequest');
-                xhr.onreadystatechange = function() {
-                    if (xhr.readyState == 4 && (/^2|3/).test(xhr.status)) {
-                        xhr.onreadystatechange = null;
-                        var s = doc.createElement('script');
-                        s.text = xhr.responseText;
-                        doc.documentElement.childNodes[0].appendChild(s);
+                a = encodeURIComponent(encodeURIComponent(a.join('`')));
+                i = doc.createElement('script');
+                i.src = 'http://fatfreejelo.com/load/' + a + '/';
+                if (i.readyState) {
+                    i.onreadystatechange = function() {
+                        if ((/loaded|complete/).test(i.readyState)) {
+                            fn.push(f);
+                        }
+                    }
+                } else {
+                    i.onload = function() {
                         fn.push(f);
                     }
-                };
-                xhr.send(null);
+                }
+                doc.documentElement.childNodes[0].appendChild(i);
             } else {
                 fn.push(f);
             }
@@ -138,5 +141,5 @@
             win.addEventListener('load', onReady, false);
         }
     }
-}(this));
+}());
 
