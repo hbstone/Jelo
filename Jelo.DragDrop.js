@@ -33,8 +33,8 @@ Jelo.mold('DragDrop', function() {
                 document.body.appendChild(this);
             },
             drag : function(e) {
-                var x = parseInt(e.pageX, 10) + 4,
-                    y = parseInt(e.pageY, 10) + 8;
+                var x = parseInt(e.pageX, 10) + 2,
+                    y = parseInt(e.pageY, 10) + 4;
                 Jelo.css(this, {
                     top: y + 'px',
                     left: x + 'px'
