@@ -1,39 +1,37 @@
-(function(undef, dbg, dfn, rdy) {
-    var win = window,
-        doc = win.document,
-        old = !!doc.attachEvent,
+(function(w, undef, dbg, dfn, rdy) {
+    var d = w.document,
+        old = !!d.attachEvent,
         onReady = function() {
-            win.Jelo.isReady = true;
+            w.Jelo.isReady = true;
             if (old) {
-                doc.detachEvent('onreadystatechange', onReady);
+                d.detachEvent('onreadystatechange', onReady);
             } else {
-                doc.removeEventListener('DOMContentLoaded', onReady, false);
-                win.removeEventListener('load', onReady, false);
+                d.removeEventListener('DOMContentLoaded', onReady, false);
+                w.removeEventListener('load', onReady, false);
             }
             while(fn.length) {
                 try {
-                    fn.pop().call(win, win.Jelo);
+                    fn.pop().call(w, w.Jelo);
                 } catch(err) {
-                    Jelo.debug(err);
+                    w.Jelo.debug(err);
                 }
             }
             fn = {
                 push: function(fn) {
-                    fn.call(win, win.Jelo);
+                    fn.call(w, w.Jelo);
                 }
             };
         },
         fn = [];
-    if (win.Jelo) {
-        dbg = win.Jelo.debugMode;
-        dfn = win.Jelo.debug;
-        rdy = win.Jelo.isReady;
+    if (w.Jelo) {
+        dbg = w.Jelo.debugMode;
+        dfn = w.Jelo.debug;
+        rdy = w.Jelo.isReady;
     }
-    win.Jelo = new function Jelo() {
+    w.Jelo = new function Jelo() {
         this.constructor = Jelo;
         this.undefined = undef;
         this.emptyFn = function() {};
-        this._modules = {}; // hash for quick lookup
         this.Version = {
             atLeast: function(a, b, c) {
                 a = a || 0;
@@ -54,16 +52,16 @@
                 return [this.major, this.minor, this.revision].join('.');
             },
             major: 3,
-            minor: 0, // prerelease
+            minor: 0,
             revision: 0
         };
         this.isReady = !!rdy;
         this.debugMode = !!dbg;
         this.debug = dfn || function() { // default when console is not available
-            if ('console' in win) {
+            if ('console' in w) {
                 if ('log' in console) {
                     return function() {
-                        if (win.Jelo.debugMode) {
+                        if (w.Jelo.debugMode) {
                             if ('apply' in console.log) {
                                 console.log.apply(console, arguments);
                             } else {
@@ -75,7 +73,7 @@
                 }
             }
             return function() {
-                if (win.Jelo.debugMode) {
+                if (w.Jelo.debugMode) {
                     for (var i = 0, l = arguments.length; i < l; i++) {
                         alert(arguments[i]); // TODO: write to a div so this doesn't block
                     }
@@ -88,58 +86,53 @@
                 f = a.pop(),
                 l = a.length,
                 xhr = new XMLHttpRequest(); // should have sent a poet
-            for (i = l; i--;) {
-                if (this._modules[a[i]]) {
-                    a.splice(i, 1);
-                } else {
-                    this._modules[a[i]] = true;
-                }
-            }
             if (a.length) {
-                a = encodeURIComponent(encodeURIComponent(a.join('`')));
-                i = doc.createElement('script');
+                a = encodeURIComponent(encodeURIComponent(a.join('`'))); // gets decoded twice by the time it hits the page
+                i = d.createElement('script');
                 i.src = 'http://fatfreejelo.com/load/' + a + '/';
                 if (i.readyState) {
                     i.onreadystatechange = function() {
                         if ((/loaded|complete/).test(i.readyState)) {
+                            i.onreadystatechange = null;
                             fn.push(f);
                         }
                     }
                 } else {
                     i.onload = function() {
+                        i.onload = null;
                         fn.push(f);
                     }
                 }
-                doc.documentElement.childNodes[0].appendChild(i);
+                d.documentElement.childNodes[0].appendChild(i);
             } else {
                 fn.push(f);
             }
         };
         this.mold = function(name, obj) {
             try {
-                var space = win.Jelo;
-                name = name.replace(/[^0-9a-z\.]/gi, '').split('.');
-                for (var i = 0, l = name.length - 1; i < l; i++) {
-                    if (!space[name[i]]) {
-                        space[name[i]] = {};
+                var ns = w.Jelo,
+                    n = name.replace(/[^0-9a-z\.]/gi, '').split('.');
+                for (var i = 0, l = n.length - 1; i < l; i++) {
+                    if (!ns[n[i]]) {
+                        ns[n[i]] = {};
                     }
-                    space = space[name[i]];
+                    ns = ns[n[i]];
                 }
-                space[name[i]] = obj;
+                ns[n[i]] = obj;
             } catch(err) {
                 throw new Error('Jelo.mold: Invalid name "' + name + '"');
             }
         };
     };
-    if (win.Jelo.isReady) {
+    if (w.Jelo.isReady) {
         onReady();
     } else {
         if (old) {
-            doc.attachEvent('onreadystatechange', onReady);
+            d.attachEvent('onreadystatechange', onReady);
         } else {
-            doc.addEventListener('DOMContentLoaded', onReady, false);
-            win.addEventListener('load', onReady, false);
+            d.addEventListener('DOMContentLoaded', onReady, false);
+            w.addEventListener('load', onReady, false);
         }
     }
-}());
+}(this));
 
