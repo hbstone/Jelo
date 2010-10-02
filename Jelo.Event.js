@@ -199,6 +199,22 @@ Jelo.mold('Event', function() {
                 remove(el, ev, fn);
             }
         },
+        delegate : function(el, ev, fn, sel) {
+            var f = function(e) {
+                var i, t = e.target,
+                    els = Jelo.Dom.selectAll(sel || '*', el);
+                for (i = els.length; i >= 0; --i) {
+                    if (els[i] == t) {
+                        fn.call(els[i], e);
+                    }
+                }
+            };
+            Jelo.Event.add(el, ev, f);
+            return f;
+        },
+        undelegate : function(el, ev, fn) {
+            Jelo.Event.remove(el, ev, fn);
+        },
         create : defineEvent
     };
 }());
