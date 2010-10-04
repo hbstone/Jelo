@@ -107,6 +107,20 @@ Jelo.mold('DragDrop', function() {
         dragTarget = null;
     }
     
+    Jelo.Dom.addShortcuts({
+        setDraggable: function(f, h) {
+            Jelo.DragDrop.setDraggable(this, f, h);
+            return this;
+        },
+        setDroppable: function(f, h) {
+            Jelo.DragDrop.setDroppable(this, f, h);
+            return this;
+        },
+        isDragging: function() {
+            return Jelo.DragDrop.isDragging(this);
+        }
+    });
+
     /** @scope Jelo.DragDrop */
     return {
         /**

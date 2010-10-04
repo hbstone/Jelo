@@ -179,6 +179,24 @@ Jelo.mold('Event', function() {
                 isListening ? Jelo.Event.add(this, 'mousewheel', f, useCapture, false) : Jelo.Event.remove(this, 'mousewheel', f, useCapture, false);
             }
         };
+    Jelo.Dom.addShortcuts({
+        on: function(ev, fn) {
+            Jelo.Event.add(this, ev, fn);
+            return this;
+        },
+        un: function(ev, fn) {
+            Jelo.Event.remove(this, ev, fn);
+            return this;
+        },
+        delegate: function(ev, fn, sel) {
+            return Jelo.Event.delegate(this, ev, fn, sel);
+        },
+        undelegate: function(ev, fn) {
+            Jelo.Event.remove(this, ev, fn);
+            return this;
+        }
+    });
+
     /** @scope Jelo.Event */
     return {
         add : function(el, ev, fn) {

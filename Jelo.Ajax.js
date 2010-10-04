@@ -40,6 +40,13 @@ Jelo.mold('Ajax', function() {
             }
         };
     
+    Jelo.Dom.addShortcuts({
+        load: function(url, data) {
+            Jelo.Ajax.load(this, url, data);
+            return this;
+        }
+    });
+
     /** @scope Jelo.Ajax */
     return {
         /**
@@ -65,13 +72,13 @@ Jelo.mold('Ajax', function() {
          * @function
          * @param {HTMLElement} element The target in which to dump the returned contents.
          * @param {String} url The (local) page address to fetch.
-         * @param {Object} [post] Parameters to send along with the request.
+         * @param {Object} [data] Parameters to send along with the request.
          */
-        load       : function(el, url, post) {
+        load       : function(el, url, data) {
             if (el && url) {
                 this.request({
                     url     : url,
-                    data    : post || {},
+                    data    : data || {},
                     success : function() {
                         el.innerHTML = this.responseText;
                     }

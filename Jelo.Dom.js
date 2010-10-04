@@ -4,65 +4,36 @@
  */
 Jelo.mold('Dom', function () {
     var sizzle = Jelo.Sizzle || window.Sizzle,
-        returnFalse = function() { return false; };
+        returnFalse = function() { return false; },
+        shortcuts = {
+            findPosition: function() {
+                return Jelo.Dom.findPosition(this);
+            }
+        },
+        wrap = function(el) {
+            if (el) {
+                if (el instanceof Array && !('_jelodom' in el)) {
+                    var arr = [];
+                    for (var i = 0, l = el.length; i < l; i++) {
+                        arr.push(wrap(el[i]));
+                    }
+                    arr._jelodom = true;
+                    return wrap(arr);
+                }
+                if ('_jelodom' in el) {
+                    delete el._jelodom;
+                }
+                for (var i in shortcuts) {
+                    if (shortcuts.hasOwnProperty(i)) {
+                        el[i] = shortcuts[i];
+                    }
+                }
+                return el;
+	    }
+        };
     if (!sizzle) {
         throw new Error('Jelo.Dom: Sizzle not found');
     }
-	function doGetStyle(prop) {
-	    return Jelo.CSS.getStyle(this, prop);
-	}
-	function doSetStyle(prop, val) {
-	    Jelo.CSS.setStyle(this, prop, val);
-	    return this;
-	}
-	function doAddClass(cls) {
-	    Jelo.CSS.addClass(this, cls);
-	    return this;
-	}
-	function doRemoveClass(cls) {
-	    Jelo.CSS.removeClass(this, cls);
-	    return this;
-	}
-	function doToggleClass(clsAdd, clsRemove) {
-	    Jelo.CSS.toggleClass(this, clsAdd, clsRemove);
-	    return this;
-	}
-	function doHasClass(cls) {
-	    return Jelo.CSS.hasClass(this, cls);
-	}
-	function doOn(ev, fn) {
-	    Jelo.Event.add(this, ev, fn);
-	    return this;
-	}
-	function doUn(ev, fn) {
-	    Jelo.Event.remove(this, ev, fn);
-	    return this;
-	}
-	function dom(el) {
-	    if (el) {
-	        if (el instanceof Array && !('_jelodom' in el)) {
-				var arr = [];
-	            for (var i = 0, l = el.length; i < l; i++) {
-	                arr.push(dom(el[i]));
-	            }
-				arr._jelodom = true;
-				return dom(arr);
-	        } else {
-				if ('_jelodom' in el) {
-					delete el._jelodom;
-				}
-	            el.getStyle = doGetStyle;
-	            el.setStyle = doSetStyle;
-	            el.addClass = doAddClass;
-	            el.removeClass = doRemoveClass;
-	            el.toggleClass = doToggleClass;
-	            el.hasClass = doHasClass;
-	            el.on = doOn;
-	            el.un = doUn;
-	            return el;
-	        }
-	    }
-	}
     
     /** @scope Jelo.Dom */
     return {
@@ -103,7 +74,7 @@ Jelo.mold('Dom', function () {
          * @returns {Array}
          */
         selectAll: function (selector, context, results) {
-            return dom((typeof selector == 'string') ? sizzle(selector, context, results) : selector);
+            return wrap((typeof selector == 'string') ? sizzle(selector, context, results) : selector);
         },
         /**
          * Selects the FIRST instance of a matching element.
@@ -114,7 +85,7 @@ Jelo.mold('Dom', function () {
          * @returns {Node}
          */
         select: function (selector, context, results) {
-            return dom((typeof selector == 'string') ? sizzle(selector, context, results)[0] : selector);
+            return wrap((typeof selector == 'string') ? sizzle(selector, context, results)[0] : selector);
         },
         /**
          * Selects the nearest parent element which matches a given selector.
@@ -283,6 +254,25 @@ Jelo.mold('Dom', function () {
                 addOffset(el, coords);
             }
             return coords;
+        },
+        addShortcuts: function(o) {
+            for (var i in o) {
+                if (o.hasOwnProperty(i)) {
+                    shortcuts[i] = o[i];
+                }
+            }
+        },
+        getShortcuts: function() {
+            var arr = {}; // make a copy
+            for (var i in shortcuts) {
+                if (shortcuts.hasOwnProperty(i)) {
+                    arr[i] = shortcuts[i];
+                }
+            }
+            return arr;
+        },
+        addShortcut: function(name, fn) {
+            Jelo.Dom.addShortcuts({name:fn});
         }
     };
 }());

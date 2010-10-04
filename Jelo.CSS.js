@@ -98,6 +98,37 @@ Jelo.mold('CSS', function() {
             e.style[C.toCamel(p)] = v;
         };
     }();
+
+    Jelo.Dom.addShortcuts({
+        hasClass: function(c) {
+            return Jelo.CSS.hasClass(this, c);
+        },
+        addClass: function(c) {
+           Jelo.CSS.addClass(this, c);
+            return this;
+        },
+        removeClass: function(c) {
+            Jelo.CSS.removeClass(this, c);
+            return this;
+        },
+        toggleClass: function(c) {
+            Jelo.CSS.toggleClass(this, c);
+            return this;
+        },
+        replaceClass: function(r, a) {
+            Jelo.CSS.replaceClass(this, r, a);
+            return this;
+        },
+        getStyle: function(p) {
+            return Jelo.CSS.getStyle(this, p);
+        },
+        setStyle: function(p, v) {
+            Jelo.CSS.setStyle(this, p, v);
+            return this;
+        }
+    });
+
+    /** @scope Jelo.CSS */
     return {
         hasClass: function(el, cls) {
             return (C.each(el, function() {
