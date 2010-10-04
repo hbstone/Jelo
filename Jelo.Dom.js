@@ -232,15 +232,57 @@ Jelo.mold('Dom', function () {
          * @return {Array} An Array of the form: [xPosition, yPosition], where the coordinates are relative to the entire document.
          */
         findPosition: function(el) {
-            var x = 0,
-                y = 0;
-            if (el && el.offsetParent) {
-                do {
-                    x += el.offsetLeft;
-                    y += el.offsetTop;
-                } while ((el = el.offsetParent));
+            // adapted by HB Stone for Jelo, previously adapted by Johan Sandstrom for ecmanaut, previously created by Joe Hewitt for Firebug
+            var C = Jelo.CSS;
+            function add(element, property) {
+                var s = C.getStyle(element, property),
+                    v = parseInt(s, 10);
+                return isNaN(v) ? 0 : v;
             }
-            return [x, y];
+            function addOffset(node, coords) {
+                var p = node.offsetParent,
+                    n = p.localName || p.baseName;
+                coords.x += node.offsetLeft - (p ? p.scrollLeft : 0);
+                coords.y += node.offsetTop - (p ? p.scrollTop : 0);
+                if (p) {
+                    if (p.nodeType == 1) {
+                        if (C.getStyle(p, 'position') != 'static') {
+                            coords.x += add(p, 'border-left-width');
+                            coords.y += add(p, 'border-top-width');
+                            if ((/table/i).test(n)) {
+                                coords.x += add(p, 'padding-left');
+                                coords.y += add(p, 'padding-top');
+                            } else if ((/body/i).test(n)) {
+                                coords.x += add(node, 'margin-left');
+                                coords.y += add(node, 'margin-top');
+                            }
+                        } else if ((/body/i).test(n)) {
+                            coords.x += add(p, 'border-left-width');
+                            coords.y += add(p, 'border-top-width');
+                        }
+                        var parent = node.parentNode;
+                        while (p != parent) {
+                            coords.x -= parent.scrollLeft;
+                            coords.y -= parent.scrollTop;
+                            parent = parent.parentNode;
+                        }
+                        addOffset(p, coords);
+                    }
+                } else {
+                    if ((/body/i).test(node.localName || node.baseName)) {
+                        coords.x += add(node, 'border-left-width') - add(node.parentNode, 'padding-left');
+                        coords.y += add(node, 'border-top-width') - add(node.parentNode, 'padding-top');
+                    }
+                    if (node.scrollLeft) { coords.x += node.scrollLeft; }
+                    if (node.scrollTop) { coords.y += node.scrollTop; }
+                    // NOTE: need to add a check for frames here
+                }
+            }
+            var coords = {x:0,y:0};
+            if (el) {
+                addOffset(el, coords);
+            }
+            return coords;
         }
     };
 }());
