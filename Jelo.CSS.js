@@ -99,6 +99,121 @@ Jelo.mold('CSS', function() {
         };
     }();
 
+    /** @private */
+    function getStylesheets() {
+        var s = [],
+            d = document.styleSheets || [],
+            l = d.length, di;
+        for (var i = 0; i < l; i++) {
+            di = d[i];
+            s.push(di);
+        }
+        return s;
+    }
+    
+    /** @private */
+    function getRules(sh) {
+        if (!sh) {
+            sh = getStylesheets();
+        }
+        if (Jelo.isIterable(sh)) {
+            return function() {
+                var a = [];
+                for (var i = 0, l = sh.length; i < l; i++) {
+                    for (var ii = 0, r = getRules(sh[i]); ii < r.length; ii++) {
+                        a.push(r[ii]);
+                    }
+                }
+                return a;
+            }();
+        }
+        var r = sh.cssRules || sh.rules,
+            l = r.length,
+            a = [];
+        for (var i = 0, rule; i < l; i++) {
+            rule = r[i];
+            if (rule.selectorText) {
+                a.push({
+                    selectorText : rule.selectorText,
+                    cssText      : rule.style.cssText
+                });
+            }
+        }
+        return a;
+    }
+    
+    /** @private */
+    function getRuleStyle(sel, sh) {
+        if (!sh) {
+            sh = getStylesheets();
+        }
+        if (Jelo.isEnumerable(sh)) {
+            return function() {
+                for (var i = sh.length - 1, s; i >= 0; i--) {
+                    s = getRuleStyle(sel, sh[i]);
+                    if (s.length) {
+                        return s;
+                    }
+                }
+                return '';
+            }();
+        }
+        var r = sh.cssRules || sh.rules,
+            x = new RegExp('\\b' + sel + '\\b', 'i');
+        for (var i = r.length - 1, rule; i >= 0; i--) {
+            rule = r[i];
+            if (rule.selectorText && x.test(rule.selectorText)) {
+                return rule.style.cssText;
+            }
+        }
+        return '';
+    }
+    
+    /** @private */
+    function insertRule(sel, css, sh, idx) {
+        if (!sh) {
+            sh = getStylesheets();
+            sh = sh[sh.length - 1];
+        }
+        if (typeof idx != 'number') {
+            idx = getRules(sh).length;
+        }
+        if (sh.insertRule) {
+            sh.insertRule(sel + '{' + css + '}', idx);
+        } else if (sh.addRule) {
+            sh.addRule(sel, css, idx);
+        }
+    }
+    
+    /** @private */
+    function deleteRule(sel, sh) {
+        var i, rules;
+        if (!sh) {
+            sh = getStylesheets();
+            for (i = sh.length - 1; i >= 0; i--) {
+                deleteRule(sel, sh[i]);
+            }
+            return;
+        }
+        if (typeof sel == 'string') {
+            sel = sel.toLowerCase();
+            rules = getRules(sh);
+            for (i = rules.length - 1; i >= 0; i--) {
+                if (rules[i].selectorText.toLowerCase() == sel) {
+                    selector = i;
+                    break;
+                }
+            }
+        }
+        if (i >= 0) {
+            if (sh.deleteRule) {
+                sh.deleteRule(sel);
+            } else if (sheet.removeRule) {
+                sh.removeRule(sel);
+            }
+        }
+    }
+
     Jelo.Dom.addShortcuts({
         hasClass: function(c) {
             return Jelo.CSS.hasClass(this, c);
@@ -216,7 +331,12 @@ Jelo.mold('CSS', function() {
             return '#' + (function(h) {
                 return new Array(7 - h.length).join('0') + h;
             })((Math.random() * (0xFFFFFF + 1) << 0).toString(16));
-        }
+        },
+        getStylesheets: getStylesheets,
+        getRules: getRules,
+        getRuleStyle: getRuleStyle,
+        insertRule: insertRule,
+        deleteRule: deleteRule
     };
 }());
 Jelo.css = function(el, prop, val) {
