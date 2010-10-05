@@ -330,6 +330,21 @@ Jelo.mold('Anim', function() {
         };
     }();
     
+    Jelo.Dom.addShortcuts({
+        isAnimating: function() {
+            return Jelo.Anim.ating(this);
+        },
+        stopAnimating: function(f) {
+            Jelo.Anim.stop(this, f);
+            return this;
+        },
+        animate: function(o) {
+            o.me = this;
+            Jelo.Anim.ate(o);
+            return this;
+        }
+    });
+
     /** @scope Jelo.Anim */
     return {
         /**
