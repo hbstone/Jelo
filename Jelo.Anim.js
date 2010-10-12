@@ -83,18 +83,19 @@ Jelo.mold('Anim', function() {
                 return (-Math.cos((x * ((n || 2) - 0.5) * 2) * Math.PI) / 2) + 0.5;
             }
         };
-    },
+    }(),
     defaults = {
         me: document.createElement('div'),
         css: '',
         duration: 0.48,
-        easing: 'sine'
+        easing: 'SINE'
     };
     function configurate(obj) {
-        obj.duration = parseInt(obj.duration, 10);
+        obj.duration = parseFloat(obj.duration, 10);
         if (isNaN(obj.duration)) {
             obj.duration = defaults.duration;
         }
+        obj.duration = (obj.duration * 1000).toFixed(0);
         if (!obj.me) {
             obj.me = defaults.me;
         }
@@ -107,14 +108,12 @@ Jelo.mold('Anim', function() {
                 break;
             case 'string':
                 obj.easing = obj.easing.toUpperCase();
-                if (!(obj.easing in Easing)) {
-                    obj.easing = defaults.easing;
-                }
+                obj.easing = Easing[obj.easing] || Easing[defaults.easing];
                 break;
             case 'object': // fall through
             case 'undefined': // fall through
             default:
-                obj.easing = defaults.easing;
+                obj.easing = Easing[defaults.easing];
         }
         return obj;
     }
@@ -126,8 +125,7 @@ Jelo.mold('Anim', function() {
         },
         Easing: Easing,
         ate: function(config) {
-            config = configurate(config);
-            this.emile(config.me, config.css, config);
+            (new Jelo.Anim.ation(config)).run();
         },
         ation: function(config) {
             if (!(this instanceof Jelo.Anim.ation)) {

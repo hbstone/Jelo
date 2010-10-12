@@ -4,7 +4,8 @@
 (function(functionName, container) {
 
     // defaults
-    var defaultDuration = 400;
+    var defaultDuration = 400,
+        elements = {};
 
     function defaultEase(position) { return (-Math.cos(position * Math.PI) / 2) + 0.5; }
 
@@ -131,6 +132,7 @@
     function emile(elem, style, opts) {
         elem = getElement(elem);
         opts = opts || {};
+        opts.duration = parseInt(opts.duration);
 
         var target = normalize(style),
             comp = computedStyle(elem),
@@ -151,8 +153,9 @@
         }
 
         // stop previous animation
-        if (elem[mark])
-            clearInterval(elem[mark]);
+        if (elem[mark]) {
+            stopAnimation(elem);
+        }
 
         // mark element as being animated and start main animation loop
         elem[mark] = setInterval(function() {
@@ -175,30 +178,28 @@
             }
         }, 10);
         elements[elem[mark]] = elem;
-        Jelo.debug('added element. whole array:', elements);
     }
 
     function stopAnimation(elem) {
         elem = getElement(elem);
-        if (elements[elem[mark]]) {
-            Jelo.debug('removed element', elements[elem[mark]]);
-            delete elements[elem[mark]];
-        }
         if (elem[mark]) {
+            if (elements[elem[mark]]) {
+                delete elements[elem[mark]];
+            }
             clearInterval(elem[mark]);
             elem[mark] = null;
-        }
-    }
-
-    function stopAll() {
-        for (var elem in elements) {
-            stopAnimation(elements[elem]);
         }
     }
 
     // declare externs
     container[functionName] = emile;
     container[functionName].stopAnimation = stopAnimation;
-    container[functionName].stopAll = stopAll;
+    container[functionName].stopAll = function() {
+        for (var i in elements) {
+            if (elements.hasOwnProperty(i)) {
+                stopAnimation(elements[i]);
+            }
+        }
+    };
 
 })('emile', Jelo.Anim);
