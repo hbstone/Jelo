@@ -1,6 +1,6 @@
-(function (window) {
-    if (!window.JSON) {
-        window.JSON = {};
+(function (win) {
+    if (!win.JSON) {
+        win.JSON = {};
     }
     function f(n) {
         return n < 10 ? '0' + n : n;
@@ -92,8 +92,8 @@
             return v;
         }
     }
-    if (typeof JSON.stringify !== 'function') {
-        JSON.stringify = function (value, replacer, space) {
+    if (typeof win.JSON.stringify !== 'function') {
+        win.JSON.stringify = function (value, replacer, space) {
             var i;
             gap = '';
             indent = '';
@@ -113,8 +113,8 @@
             });
         };
     }
-    if (typeof JSON.parse !== 'function') {
-        JSON.parse = function (text, reviver) {
+    if (typeof win.JSON.parse !== 'function') {
+        win.JSON.parse = function (text, reviver) {
             var j;
 
             function walk(holder, key) {
