@@ -23,30 +23,6 @@
 
     function letterAt(str, index) { return str.substr(index, 1); }
 
-    // opacity support
-    var reOpacity = /alpha\s*\(\s*opacity\s*=\s*([^\)]+)\)/;
-    var setOpacity = function(elem, value) { elem.style.opacity = value; };
-    var getOpacity = function(comp) { return comp.opacity; };
-
-    // support opacity for ie6 and 7 (ie8 supports normal opacity)
-    if (typeof parseElem.style.filter == 'string' && typeof parseElem.style.opacity != 'string') {
-        setOpacity = function(elem, value) {
-            var es = elem.style;
-            if (elem.currentStyle && !elem.currentStyle.hasLayout) es.zoom = 1;
-            if (reOpacity.test(es.filter)) {
-                value = value >= 0.9999 ? '' : ('alpha(opacity=' + (value * 100) + ')');
-                es.filter = es.filter.replace(reOpacity, value);
-            }
-            else
-                es.filter += ' alpha(opacity=' + (value * 100) + ')';
-        };
-
-        getOpacity = function(comp) {
-            var m = comp.filter.match(reOpacity);
-            return (m ? (m[1] / 100) : 1) + '';
-        };
-    }
-
     // determines numerical value according to position (0 means begining and 1 end of animation)
     function interpolateNumber(source, target, position) {
         var objToReturn = source + (target - source) * position;
@@ -74,7 +50,7 @@
     // this function decides if property is numerical or color based
     function parse(prop) {
         var p = parseFloat(prop),
-            q = prop.replace(/^[\-\d\.]+/,'');
+            q = ('' + prop).replace(/^[\-\d\.]+/,'');
 
         if (isNaN(p))
             return { value: q, func: interpolateColor, unit: ''};
@@ -140,7 +116,7 @@
 
         // parse css properties
         for(prop in target) {
-            current[prop] = (prop == 'opacity') ? parse(getOpacity(comp)) : parse(comp[prop]);
+            current[prop] = parse(Jelo.CSS.getStyle(elem, prop));
         }
 
         // stop previous animation
@@ -156,10 +132,7 @@
             // update element values
             for(prop in target) {
                 curValue = target[prop].func(current[prop].value, target[prop].value, easing(position)) + target[prop].unit;
-                if (prop === 'opacity')
-                    setOpacity(elem, curValue);
-                else
-                    Jelo.CSS.setStyle(elem, prop, curValue);
+                Jelo.CSS.setStyle(elem, prop, curValue);
             }
             opts.percent = position;
             opts.during && opts.during(opts);
