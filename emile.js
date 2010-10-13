@@ -124,6 +124,7 @@
             stopAnimation(elem);
         }
 
+        opts.before && opts.before.call(opts.me, opts);
         // mark element as being animated and start main animation loop
         elem[mark] = setInterval(function() {
             var time = +new Date,
@@ -135,12 +136,12 @@
                 Jelo.CSS.setStyle(elem, prop, curValue);
             }
             opts.percent = position;
-            opts.during && opts.during(opts);
+            opts.during && opts.during.call(opts.me, opts);
 
             // check for animation end
             if(time > finish) {
                 stopAnimation(elem);
-                opts.after && opts.after(opts);
+                opts.after && opts.after.call(opts.me, opts);
             }
         }, 10);
         elements[elem[mark]] = elem;
