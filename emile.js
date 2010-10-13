@@ -21,10 +21,7 @@
 
     function getElement(elem) { return typeof elem == 'string' ? document.getElementById(elem) : elem; }
 
-    var computedStyle = function(elem) { return elem.currentStyle; }
-
-    if (document.defaultView && typeof document.defaultView.getComputedStyle !== 'undefined')
-        computedStyle = function(elem) { return document.defaultView.getComputedStyle(elem, null); }
+    function letterAt(str, index) { return str.substr(index, 1); }
 
     // opacity support
     var reOpacity = /alpha\s*\(\s*opacity\s*=\s*([^\)]+)\)/;
@@ -49,8 +46,6 @@
             return (m ? (m[1] / 100) : 1) + '';
         };
     }
-
-    function letterAt(str, index) { return str.substr(index, 1); }
 
     // determines numerical value according to position (0 means begining and 1 end of animation)
     function interpolateNumber(source, target, position) {
@@ -78,8 +73,8 @@
 
     // this function decides if property is numerical or color based
     function parse(prop) {
-        var p = parseFloat(prop);
-        var q = prop.replace(/^[\-\d\.]+/,'');
+        var p = parseFloat(prop),
+            q = prop.replace(/^[\-\d\.]+/,'');
 
         if (isNaN(p))
             return { value: q, func: interpolateColor, unit: ''};
@@ -135,7 +130,6 @@
         opts.duration = parseInt(opts.duration);
 
         var target = normalize(style),
-            comp = computedStyle(elem),
             prop,
             current = {},
             start = +new Date,
@@ -146,10 +140,7 @@
 
         // parse css properties
         for(prop in target) {
-            if (prop !== 'opacity')
-                current[prop] = parse(comp[prop]);
-            else
-                current[prop] = parse(getOpacity(comp));
+            current[prop] = (prop == 'opacity') ? parse(getOpacity(comp)) : parse(comp[prop]);
         }
 
         // stop previous animation
@@ -159,8 +150,8 @@
 
         // mark element as being animated and start main animation loop
         elem[mark] = setInterval(function() {
-            var time = +new Date;
-            var position = (time > finish) ? 1 : (time - start) / dur;
+            var time = +new Date,
+                position = (time > finish) ? 1 : (time - start) / dur;
 
             // update element values
             for(prop in target) {
@@ -168,13 +159,15 @@
                 if (prop === 'opacity')
                     setOpacity(elem, curValue);
                 else
-                    elem.style[prop] = curValue;
+                    Jelo.CSS.setStyle(elem, prop, curValue);
             }
+            opts.percent = position;
+            opts.during && opts.during(opts);
 
             // check for animation end
             if(time > finish) {
                 stopAnimation(elem);
-                opts.after && opts.after();
+                opts.after && opts.after(opts);
             }
         }, 10);
         elements[elem[mark]] = elem;
@@ -192,14 +185,22 @@
     }
 
     // declare externs
-    container[functionName] = emile;
-    container[functionName].stopAnimation = stopAnimation;
-    container[functionName].stopAll = function() {
+    emile.stopAnimation = stopAnimation;
+    emile.stopAll = function() {
         for (var i in elements) {
             if (elements.hasOwnProperty(i)) {
                 stopAnimation(elements[i]);
             }
         }
     };
+    emile.animating = function(el) {
+        for (var i in elements) {
+            if (elements.hasOwnProperty(i) && (!el || (elements[i] == el))) {
+                return true;
+            }
+        }
+        return false;
+    };
+    container[functionName] = emile;
 
 })('emile', Jelo.Anim);
