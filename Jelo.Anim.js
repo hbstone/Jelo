@@ -125,7 +125,21 @@ Jelo.mold('Anim', function() {
         },
         Easing: Easing,
         ate: function(config) {
-            (new Jelo.Anim.ation(config)).run();
+            if (Jelo.isIterable(config.me)) {
+                Jelo.each(config.me, function(item) {
+                    var cfg = {};
+                    for (var i in config) {
+                        cfg[i] = config[i];
+                    }
+                    cfg.me = item;
+                    Jelo.Anim.ate(cfg);
+                });
+            } else {
+                (new Jelo.Anim.ation(config)).run();
+            }
+        },
+        ating: function(el) {
+            return this.emile.animating(el);
         },
         ation: function(config) {
             if (!(this instanceof Jelo.Anim.ation)) {
