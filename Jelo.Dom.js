@@ -2,7 +2,7 @@
  * @namespace Provides methods to collect and filter DOM elements.
  * @name Jelo.Dom
  */
-Jelo.mold('Dom', function () {
+Jelo.mold('Dom', (function () {
     var sizzle = Jelo.Sizzle || window.Sizzle,
         returnFalse = function() { return false; },
         shortcuts = {
@@ -11,10 +11,11 @@ Jelo.mold('Dom', function () {
             }
         },
         wrap = function(el) {
+            var i, arr;
             if (el) {
                 if (el instanceof Array && !('_jelodom' in el)) {
-                    var arr = [];
-                    for (var i = 0, l = el.length; i < l; i++) {
+                    arr = [];
+                    for (i = 0, l = el.length; i < l; i++) {
                         arr.push(wrap(el[i]));
                     }
                     arr._jelodom = true;
@@ -23,13 +24,13 @@ Jelo.mold('Dom', function () {
                 if ('_jelodom' in el) {
                     delete el._jelodom;
                 }
-                for (var i in shortcuts) {
+                for (i in shortcuts) {
                     if (shortcuts.hasOwnProperty(i)) {
                         el[i] = shortcuts[i];
                     }
                 }
                 return el;
-	    }
+        }
         };
     if (!sizzle) {
         throw new Error('Jelo.Dom: Sizzle not found');
@@ -100,17 +101,18 @@ Jelo.mold('Dom', function () {
         /** @ignore TODO: test and document this function */
         create: function (o) {
             // NOTE: fromString() can be much faster than create() for many elements
+            var i, l, node;
             if (typeof o == 'string') {
                 return document.createTextNode(o); // special case shortcut
             }
             if (o.tag) {
-                var node = document.createElement(o.tag);
+                node = document.createElement(o.tag);
                 node.id = o.id || '';
                 node.className = o.cls || '';
                 node.innerHTML = o.html || '';
                 if (Jelo.isIterable(o.children)) {
-                    var l = o.children.length;
-                    for (var i = 0; i < l; i++) {
+                    l = o.children.length;
+                    for (i = 0; i < l; i++) {
                         node.appendChild(Jelo.Dom.create(o.children[i]));
                     }
                 }
@@ -144,9 +146,9 @@ Jelo.mold('Dom', function () {
                 attr = 'className';
             }
             if (Jelo.isIterable(el)) {
-                var attrs = [],
+                var i, attrs = [],
                     l = el.length;
-                for (var i = 0; i < l; i++) {
+                for (i = 0; i < l; i++) {
                     attrs.push(el[i][attr] || '');
                 }
                 return attrs;
@@ -190,11 +192,11 @@ Jelo.mold('Dom', function () {
          */
         selectable: function(el, b) {
             Jelo.each(el, function(me) {
-	            Jelo.CSS.setStyle(me, 'user-select', b ? '' : 'none');
-	            Jelo.CSS.setStyle(me, '-moz-user-select', b ? '' : 'none');
-	            Jelo.CSS.setStyle(me, '-khtml-user-select', b ? '' : 'none');
-	            me.onselectstart = b ? null : returnFalse; // TODO: store old selectstart if exists
-	            me.setAttribute('unselectable', b ? '' : 'on', 0);
+                Jelo.CSS.setStyle(me, 'user-select', b ? '' : 'none');
+                Jelo.CSS.setStyle(me, '-moz-user-select', b ? '' : 'none');
+                Jelo.CSS.setStyle(me, '-khtml-user-select', b ? '' : 'none');
+                me.onselectstart = b ? null : returnFalse; // TODO: store old selectstart if exists
+                me.setAttribute('unselectable', b ? '' : 'on', 0);
             });
         },
         /**
@@ -204,14 +206,14 @@ Jelo.mold('Dom', function () {
          */
         findPosition: function(el) {
             // adapted by HB Stone for Jelo, previously adapted by Johan Sandstrom for ecmanaut, previously created by Joe Hewitt for Firebug
-            var C = Jelo.CSS;
+            var C = Jelo.CSS, coords = {x:0,y:0};
             function add(element, property) {
                 var s = C.getStyle(element, property),
                     v = parseInt(s, 10);
                 return isNaN(v) ? 0 : v;
             }
             function addOffset(node, coords) {
-                var p = node.offsetParent,
+                var parent, p = node.offsetParent,
                     n = p.localName || p.baseName;
                 coords.x += node.offsetLeft - (p ? p.scrollLeft : 0);
                 coords.y += node.offsetTop - (p ? p.scrollTop : 0);
@@ -231,7 +233,7 @@ Jelo.mold('Dom', function () {
                             coords.x += add(p, 'border-left-width');
                             coords.y += add(p, 'border-top-width');
                         }
-                        var parent = node.parentNode;
+                        parent = node.parentNode;
                         while (p != parent) {
                             coords.x -= parent.scrollLeft;
                             coords.y -= parent.scrollTop;
@@ -249,7 +251,6 @@ Jelo.mold('Dom', function () {
                     // NOTE: need to add a check for frames here
                 }
             }
-            var coords = {x:0,y:0};
             if (el) {
                 addOffset(el, coords);
             }
@@ -263,8 +264,8 @@ Jelo.mold('Dom', function () {
             }
         },
         getShortcuts: function() {
-            var arr = {}; // make a copy
-            for (var i in shortcuts) {
+            var i, arr = {}; // make a copy
+            for (i in shortcuts) {
                 if (shortcuts.hasOwnProperty(i)) {
                     arr[i] = shortcuts[i];
                 }
@@ -275,7 +276,7 @@ Jelo.mold('Dom', function () {
             Jelo.Dom.addShortcuts({name:fn});
         }
     };
-}());
+}()));
 
 // NOTE: If either $ or $$ is already defined, Jelo will err on the side of safety and not make either global shortcut. Define them yourself if you're sure they're safe.
 if (!('$' in this) && !('$$' in this)) {

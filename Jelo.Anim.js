@@ -3,10 +3,11 @@
  *            http://github.com/madrobby/emile
  * @name Jelo.Anim
  */
-Jelo.mold('Anim', function() {
-    var Easing = function() {
+Jelo.mold('Anim', (function() {
+    var Easing = (function() {
         // thanks to robert penner, thomas fuchs, et al
-        var s = 1.70158;
+        var s = 1.70158,
+            b = 7.5625;
         return {
             LINEAR     : function(x) {
                 return x;
@@ -21,9 +22,9 @@ Jelo.mold('Anim', function() {
                 return (-Math.cos(x * Math.PI) / 2) + 0.5;
             },
             BOTH       : function(x) {
-                return ((x /= 0.5) < 1)
-                    ? 0.5 * Math.pow(x, 2)
-                    : -0.5 * ((x -= 2) * x - 2);
+                return ((x /= 0.5) < 1) ?
+                    0.5 * Math.pow(x, 2) :
+                    -0.5 * ((x -= 2) * x - 2);
             },
             STRONGIN   : function(x) {
                 return Math.pow(x, 4);
@@ -32,27 +33,27 @@ Jelo.mold('Anim', function() {
                 return -(Math.pow((x - 1), 4) - 1);
             },
             STRONGBOTH : function(x) {
-                return ((x /= 0.5) < 1)
-                    ? 0.5 * Math.pow(x, 4)
-                    : -0.5 * ((x -= 2) * Math.pow(x, 3) - 2);
+                return ((x /= 0.5) < 1) ?
+                    0.5 * Math.pow(x, 4) :
+                    -0.5 * ((x -= 2) * Math.pow(x, 3) - 2);
             },
             BOUNCE     : function(x) {
-                return ((x < (1 / 2.75))
-                    ? 7.5625 * x * x
-                    : (x < (2 / 2.75))
-                        ? 7.5625 * (x -= (1.5 / 2.75)) * x + 0.75
-                        : (x < (2.5 / 2.75))
-                            ? 7.5625 * (x -= (2.25 / 2.75)) * x + 0.9375
-                            : 7.5625 * (x -= (2.625 / 2.75)) * x + 0.984375);
+                return (x < (1 / 2.75)) ?
+                    b * x * x :
+                    (x < (2 / 2.75)) ?
+                        b * (x -= (1.5 / 2.75)) * x + 0.75 :
+                        (x < (2.5 / 2.75)) ?
+                            b * (x -= (2.25 / 2.75)) * x + 0.9375 :
+                            b * (x -= (2.625 / 2.75)) * x + 0.984375;
             },
             BOUNCEPAST : function(x) {
-                return ((x < (1 / 2.75))
-                    ? 7.5625 * x * x
-                    : (x < (2 / 2.75))
-                        ? 2 - (7.5625 * (x -= (1.5 / 2.75)) * x + 0.75)
-                        : (x < (2.5 / 2.75))
-                            ? 2 - (7.5625 * (x -= (2.25 / 2.75)) * x + 0.9375)
-                            : 2 - (7.5625 * (x -= (2.625 / 2.75)) * x + 0.984375));
+                return (x < (1 / 2.75)) ?
+                    b * x * x :
+                    (x < (2 / 2.75)) ?
+                        2 - (b * (x -= (1.5 / 2.75)) * x + 0.75) :
+                        (x < (2.5 / 2.75)) ?
+                            2 - (b * (x -= (2.25 / 2.75)) * x + 0.9375) :
+                            2 - (b * (x -= (2.625 / 2.75)) * x + 0.984375);
             },
             SWINGIN    : function(x) {
                 return x * x * (((s + 1) * x) - s);
@@ -63,9 +64,9 @@ Jelo.mold('Anim', function() {
             SWINGBOTH  : function(x) {
                 x *= 2; // doesn't work if you combine this math with the ternary condition
                 var sb = s * 1.525;
-                return ((x < 1)
-                    ? 0.5 * (x * x * (((sb *= (1.525)) + 1) * x - sb)) 
-                    : 0.5 * ((x -= 2) * x * ((sb + 1) * x + sb) + 2));
+                return (x < 1) ?
+                    0.5 * (x * x * (((sb *= 1.525) + 1) * x - sb)) :
+                    0.5 * ((x -= 2) * x * ((sb + 1) * x + sb) + 2);
             },
             ELASTIC    : function(x) {
                 return -1 * Math.pow(4, -8 * x) * Math.sin((x * 6 - 1) * (2 * Math.PI) / 2) + 1;
@@ -83,7 +84,7 @@ Jelo.mold('Anim', function() {
                 return (-Math.cos((x * ((n || 2) - 0.5) * 2) * Math.PI) / 2) + 0.5;
             }
         };
-    }(),
+    }()),
     defaults = {
         me: document.createElement('div'),
         css: '',
@@ -129,7 +130,9 @@ Jelo.mold('Anim', function() {
                 Jelo.each(config.me, function(item) {
                     var cfg = {};
                     for (var i in config) {
-                        cfg[i] = config[i];
+                        if (config.hasOwnProperty(i)) {
+                            cfg[i] = config[i];
+                        }
                     }
                     cfg.me = item;
                     Jelo.Anim.ate(cfg);
@@ -154,7 +157,7 @@ Jelo.mold('Anim', function() {
             this.config = config;
             this.run = function() {
                 Jelo.Anim.emile(this.config.me, this.config.css, this.config);
-            }
+            };
         },
         stop: function(el) {
             this.emile.stopAnimation(el);
@@ -163,4 +166,4 @@ Jelo.mold('Anim', function() {
             this.emile.stopAll();
         }
     };
-}());
+}()));

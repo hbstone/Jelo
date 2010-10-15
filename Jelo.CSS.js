@@ -1,110 +1,112 @@
-Jelo.mold('CSS', function() {
+Jelo.mold('CSS', (function() {
     var C = Jelo.Core, // convenience
         d = document && document.defaultView && document.defaultView.getComputedStyle,
-        clsCache = {};
-    /** @private */
-    function killAuto(e, p) {
-        var val = 'auto';
-        switch(p) {
-            case 'top': // fall through
-            case 'right': // fall through
-            case 'bottom': // fall through
-            case 'left': // fall through
-            case 'width': // fall through
-            case 'height':
-                val = (e['offset' + p.replace(/(^.)/, function(x, y) {
-                    return y.toUpperCase();
-                })] || 0);
-                break;
-        }
-        return isNaN(val) ? val : (val + 'px');
-    }
-    /** @private */
-    function propColor(p) {
-        return (/color/i).test(p); // actually tested faster than (indexOf('olor')!=-1) in a loop of 1mil random strings
-    }
-    var getStyle = function() {
-        return d ? function(e, p) {
-            var c, val = '';
-            if (e && p) {
-                p = C.toCamel(p);
-                switch(p) {
-                    case 'backgroundPositionX': // fall through
-                    case 'backgroundPositionY':
-                        try {
-                            val = getStyle(e, 'background-position').split(' ')[(/X/).test(p) ? 0 : 1];
-                        } catch(err) {
-                            val = '0px';
-                        }
-                        break;
-                    default:
-                        if (p == 'float') {
-                            p = 'cssFloat';
-                        }
-                        c = d(e, '');
-                        if (c && c[p]) {
-                            val = c[p];
-                        }
-                }
+        clsCache = {},
+        killAuto = function (e, p) {
+            var val = 'auto';
+            switch(p) {
+                case 'top': // fall through
+                case 'right': // fall through
+                case 'bottom': // fall through
+                case 'left': // fall through
+                case 'width': // fall through
+                case 'height':
+                    val = (e['offset' + p.replace(/(^[a-z])/i, function(x, y) {
+                        return y.toUpperCase();
+                    })] || 0);
+                    break;
             }
-            if (val == 'auto') {
-                val = killAuto(e, p);
-            }
-            val = (e.style[p] || val || '').toString();
-            return propColor(p) ? Jelo.rgbToHex(val).toUpperCase() : val;
-        } : function(e, p) {
-            var val = '';
-            if (e && p) {
-                p = C.toCamel(p);
-                if (p == 'opacity') {
-                    val = 100;
-                    try {
-                        val = e.filters.item('DXImageTransform.Microsoft.Alpha').Opacity;
-                    } catch(err) {
-                        try {
-                            val = e.filters.item('alpha').opacity;
-                        } catch(err) {/* don't care */}
+            return isNaN(val) ? val : (val + 'px');
+        },
+        propColor = function (p) {
+            return (/color/i).test(p); // actually tested faster than (indexOf('olor')!=-1) in a loop of 1mil random strings
+        },
+        getStyle = (function() {
+            return d ? 
+                function(e, p) {
+                    var c, val = '';
+                    if (e && p) {
+                        p = C.toCamel(p);
+                        switch(p) {
+                            case 'backgroundPositionX': // fall through
+                            case 'backgroundPositionY':
+                                try {
+                                    val = getStyle(e, 'background-position').split(' ')[(/X/).test(p) ? 0 : 1];
+                                } catch(err) {
+                                    val = '0px';
+                                }
+                                break;
+                            default:
+                                if (p == 'float') {
+                                    p = 'cssFloat';
+                                }
+                                c = d(e, '');
+                                if (c && c[p]) {
+                                    val = c[p];
+                                }
+                        }
                     }
-                    return val / 100;
-                } else if (p == 'float') {
-                    p = 'styleFloat';
-                }
-                val = e.currentStyle[p];
-                if (val == 'auto') {
-                    val = killAuto(e, p);
-                }
-            }
-            val = (e.style[p] || val || '').toString();
-            return propColor(p) ? Jelo.rgbToHex(val).toUpperCase() : val;
-        };
-    }();
-    var setStyle = function() {
-        return d ? function(e, p, v) {
-            if (p == 'float') {
-                p = 'cssFloat';
-            }
-            e.style[C.toCamel(p)] = v;
-        } : function(e, p, v) {
-            if (p == 'opacity') {
-                if (typeof e.style.filter == 'string') {
-                    e.style.filter = 'alpha(opacity=' + (v * 100) + ')';
-                    if (!e.currentStyle || !e.currentStyle.hasLayout) {
-                        e.style.zoom = 1;
+                    if (val == 'auto') {
+                        val = killAuto(e, p);
                     }
-                }
-            } else if (p == 'float') {
-                p = 'styleFloat';
-            }
-            e.style[C.toCamel(p)] = v;
-        };
-    }();
+                    val = (e.style[p] || val || '').toString();
+                    return propColor(p) ? Jelo.rgbToHex(val).toUpperCase() : val;
+                } : 
+                function(e, p) {
+                    var val = '';
+                    if (e && p) {
+                        p = C.toCamel(p);
+                        if (p == 'opacity') {
+                            val = 100;
+                            try {
+                                val = e.filters.item('DXImageTransform.Microsoft.Alpha').Opacity;
+                            } catch(e1) {
+                                try {
+                                    val = e.filters.item('alpha').opacity;
+                                } catch(e2) {/* don't care */}
+                            }
+                            return val / 100;
+                        } else if (p == 'float') {
+                            p = 'styleFloat';
+                        }
+                        val = e.currentStyle[p];
+                        if (val == 'auto') {
+                            val = killAuto(e, p);
+                        }
+                    }
+                    val = (e.style[p] || val || '').toString();
+                    return propColor(p) ? Jelo.rgbToHex(val).toUpperCase() : val;
+                };
+        }()),
+        setStyle = (function() {
+            return d ? 
+                function(e, p, v) {
+                    if (p == 'float') {
+                        p = 'cssFloat';
+                    }
+                    e.style[C.toCamel(p)] = v;
+                } : 
+                function(e, p, v) {
+                    if (p == 'opacity') {
+                        if (typeof e.style.filter == 'string') {
+                            e.style.filter = 'alpha(opacity=' + (v * 100) + ')';
+                            if (!e.currentStyle || !e.currentStyle.hasLayout) {
+                                e.style.zoom = 1;
+                            }
+                        }
+                    } else if (p == 'float') {
+                        p = 'styleFloat';
+                    }
+                    e.style[C.toCamel(p)] = v;
+                };
+        }());
 
     /** @private */
     function getStylesheets() {
-        var s = [],
+        var i, s = [],
             d = document.styleSheets || [],
             l = d.length, di;
-        for (var i = 0; i < l; i++) {
+        for (i = 0; i < l; i++) {
             di = d[i];
             s.push(di);
         }
@@ -117,20 +119,20 @@ Jelo.mold('CSS', function() {
             sh = getStylesheets();
         }
         if (Jelo.isIterable(sh)) {
-            return function() {
-                var a = [];
-                for (var i = 0, l = sh.length; i < l; i++) {
-                    for (var ii = 0, r = getRules(sh[i]); ii < r.length; ii++) {
+            return (function() {
+                var i, ii, a = [];
+                for (i = 0, l = sh.length; i < l; i++) {
+                    for (ii = 0, r = getRules(sh[i]); ii < r.length; ii++) {
                         a.push(r[ii]);
                     }
                 }
                 return a;
-            }();
+            }());
         }
-        var r = sh.cssRules || sh.rules,
-            l = r.length,
-            a = [];
-        for (var i = 0, rule; i < l; i++) {
+        var i, a = [],
+            r = sh.cssRules || sh.rules,
+            l = r.length;
+        for (i = 0, rule; i < l; i++) {
             rule = r[i];
             if (rule.selectorText) {
                 a.push({
@@ -148,7 +150,7 @@ Jelo.mold('CSS', function() {
             sh = getStylesheets();
         }
         if (Jelo.isEnumerable(sh)) {
-            return function() {
+            return (function() {
                 for (var i = sh.length - 1, s; i >= 0; i--) {
                     s = getRuleStyle(sel, sh[i]);
                     if (s.length) {
@@ -156,11 +158,11 @@ Jelo.mold('CSS', function() {
                     }
                 }
                 return '';
-            }();
+            }());
         }
-        var r = sh.cssRules || sh.rules,
+        var i, r = sh.cssRules || sh.rules,
             x = new RegExp('\\b' + sel + '\\b', 'i');
-        for (var i = r.length - 1, rule; i >= 0; i--) {
+        for (i = r.length - 1, rule; i >= 0; i--) {
             rule = r[i];
             if (rule.selectorText && x.test(rule.selectorText)) {
                 return rule.style.cssText;
@@ -330,7 +332,7 @@ Jelo.mold('CSS', function() {
         randomColor: function() {
             return '#' + (function(h) {
                 return new Array(7 - h.length).join('0') + h;
-            })((Math.random() * (0xFFFFFF + 1) << 0).toString(16));
+            }((Math.random() * (0xFFFFFF + 1) << 0).toString(16)));
         },
         getStylesheets: getStylesheets,
         getRules: getRules,
@@ -338,9 +340,9 @@ Jelo.mold('CSS', function() {
         insertRule: insertRule,
         deleteRule: deleteRule
     };
-}());
+}()));
 Jelo.css = function(el, prop, val) {
-    if ((val !== Jelo.undefined) || (prop && (typeof prop == 'object') && !Jelo.isIterable(prop))) {
+    if ((val !== Jelo['undefined']) || (prop && (typeof prop == 'object') && !Jelo.isIterable(prop))) {
         Jelo.CSS.setStyle(el, prop, val);
     } else {
         return Jelo.CSS.getStyle(el, prop);

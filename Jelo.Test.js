@@ -1,5 +1,5 @@
 /**
- * Unit test suite for the Jelo JavaScript Library.
+ * Unit test manager for the Jelo JavaScript Library.
 <pre>
     Jelo.Test.add('name your test', function() {
         throw new Error('This test will appear in the "bad" list.');
@@ -9,14 +9,14 @@
         var testPassed = (typeof Jelo == 'object');
         if (!testPassed) {
             // This error will not be thrown, the example passed
-            throw new Error('This test will appear in the "good" list.');
+            throw new Error('"success case" will appear in the "good" list.');
         }
     });
     Jelo.Test.run();
 </pre>
  * @namespace Jelo.Test
  */
-Jelo.mold('Test', function() {
+Jelo.mold('Test', (function() {
     
     var tests = [];
     
@@ -34,14 +34,15 @@ Jelo.mold('Test', function() {
             if (!tests.length) {
                 return;
             }
-            var good = [],
+            var i, l, time, test, arg,
+                good = [],
                 bad = [];
             args = args || {};
             Jelo.debug('Jelo.Test running ' + tests.length + ' tests.');
-            for (var i = 0, l = tests.length; i < l; i++) {
-                var time = (+new Date),
-                    test = tests[i],
-                    arg = args[test.name];
+            for (i = 0, l = tests.length; i < l; i++) {
+                time = (+new Date);
+                test = tests[i];
+                arg = args[test.name];
                 try { // have to trap each test, can't move this try outside the loop
                     test.fn.apply(test, arg || []);
                     good.push({
@@ -66,4 +67,4 @@ Jelo.mold('Test', function() {
             Jelo.debug(bad);
         }
     };
-}());
+}()));

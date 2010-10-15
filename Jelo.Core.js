@@ -1,7 +1,7 @@
 /**
  * @namespace Jelo.Core
  */
-Jelo.mold('Core', function() {
+Jelo.mold('Core', (function() {
     
     /** @private */
     var toCamelCache = {};
@@ -27,15 +27,15 @@ Jelo.mold('Core', function() {
     
     // Array methods (uses native when available)
     extend('Array', function() {
-        if (Array.prototype.indexOf == Jelo.undefined) {
+        if (Array.prototype.indexOf == Jelo['undefined']) {
             /**
              * @memberOf Array
              * @param {Mixed} x The item to attempt to find.
              * @returns {Number} The item's index if found, -1 otherwise.
              */
             Array.prototype.indexOf = function(k) {
-                var len = this.length;
-                for (var i = 0; i < len; i++) {
+                var i, len = this.length;
+                for (i = 0; i < len; i++) {
                     if (this[i] == k) {
                         return i;
                     }
@@ -44,15 +44,15 @@ Jelo.mold('Core', function() {
             };
             Array.indexOf = Array.prototype.indexOf;
         }
-        if (Array.prototype.lastIndexOf == Jelo.undefined) {
+        if (Array.prototype.lastIndexOf == Jelo['undefined']) {
             /**
              * @memberOf Array
              * @param {Mixed} x The item to attempt to find.
              * @returns {Number} The index of the item's last occurrence if found, -1 otherwise.
              */
             Array.prototype.lastIndexOf = function(k) {
-                var len = this.length;
-                for (var i = len - 1; i > -1; i--) {
+                var i, len = this.length;
+                for (i = len - 1; i > -1; i--) {
                     if (this[i] == k) {
                         return i;
                     }
@@ -61,7 +61,7 @@ Jelo.mold('Core', function() {
             };
             Array.lastIndexOf = Array.prototype.lastIndexOf;
         }
-        if (Array.prototype.find == Jelo.undefined) {
+        if (Array.prototype.find == Jelo['undefined']) {
             /**
              * @memberOf Array
              * @param {Mixed} x The item to attempt to find, or a RegExp to match.
@@ -69,9 +69,8 @@ Jelo.mold('Core', function() {
              *          positive. Boolean false if no element matched.
              */
             Array.prototype.find = function(k) {
-                var res = [];
-                var len = this.length;
-                for (var i = 0; i < len; i++) {
+                var i, res = [], len = this.length;
+                for (i = 0; i < len; i++) {
                     if ((k.test && k.test(this[i])) || k === this[i]) {
                         res.push(i);
                     }
@@ -80,7 +79,7 @@ Jelo.mold('Core', function() {
             };
             Array.find = Array.prototype.find;
         }
-        if (Array.prototype.shuffle == Jelo.undefined) {
+        if (Array.prototype.shuffle == Jelo['undefined']) {
             /**
              * @memberOf Array
              * @returns {Array} The array, randomized.
@@ -137,7 +136,7 @@ Jelo.mold('Core', function() {
          * @returns {Number} Resource id, can be cancelled using clearInterval(id)
          */
         window.setInterval = f(window.setInterval);
-    })(function(f) {
+    }(function(f) {
         return function(c, t) {
             var a = [].slice.call(arguments, 2),
                 n = f.name || 'setTimeout or setInterval';
@@ -148,7 +147,7 @@ Jelo.mold('Core', function() {
                 c.apply(this, a);
             }, t);
         };
-    });
+    }));
         
     /** @scope Jelo.Core */
     return {
@@ -179,7 +178,7 @@ Jelo.mold('Core', function() {
                 a = [a];
             }
             var i, n, l = a.length;
-            if (l == Jelo.undefined) {
+            if (l == Jelo['undefined']) {
                 for (n in a) {
                     if (!a.hasOwnProperty || a.hasOwnProperty(n)) {
                         if (f.call(s || a[n], a[n], n, a) === false) {
@@ -215,12 +214,12 @@ Jelo.mold('Core', function() {
          * @function
          * @return {Number} An autoincrementing positive integer. The first number returned is 1.
          */
-        uID : function() {
+        uID : (function() {
             var id = 1; // initial value
             return function() {
                 return id++;
             };
-        }(),
+        }()),
         /**
          * Converts a string from hyphenated to camelCase. For example, Jelo.Core.toCamel("margin-left") becomes
          * "marginLeft".
@@ -293,9 +292,8 @@ Jelo.mold('Core', function() {
         rgbToArray : function(s) {
             if (typeof s == 'string') {
                 try {
-                    var sub = s.split(/\D/g),
-                        sub2 = [];
-                    for (var i = 0; i < sub.length; i++) {
+                    var i, sub = s.split(/\D/g), sub2 = [];
+                    for (i = 0; i < sub.length; i++) {
                         if (sub[i]) {
                             sub2[sub2.length] = parseInt(sub[i], 10);
                         }
@@ -335,7 +333,7 @@ Jelo.mold('Core', function() {
          * @returns {String}
          */
         urldecode : function(str) {
-            var h = {}, // histogram
+            var s, r, h = {}, // histogram
                 ret = str.toString();
             h["'"] = '%27';
             h['('] = '%28';
@@ -344,8 +342,8 @@ Jelo.mold('Core', function() {
             h['~'] = '%7E';
             h['!'] = '%21';
             h['%20'] = '+';
-            for (var r in h) {
-                if (h.hasOwnProperty(s)) {
+            for (r in h) {
+                if (h.hasOwnProperty(r)) {
                     s = h[r];
                     ret = rep(s, r, ret);
                 }
@@ -362,7 +360,7 @@ Jelo.mold('Core', function() {
          * @returns {String}
          */
         urlencode : function(str) {
-            var h = {}, // histogram
+            var s, r, h = {}, // histogram
                 tmp_arr = [],
                 ret = str.toString();
             h["'"] = '%27';
@@ -373,7 +371,7 @@ Jelo.mold('Core', function() {
             h['!'] = '%21';
             h['%20'] = '+';
             ret = encodeURIComponent(ret);
-            for (var s in h) {
+            for (s in h) {
                 if (h.hasOwnProperty(s)) {
                     r = h[s];
                     ret = rep(s, r, ret);
@@ -400,10 +398,12 @@ Jelo.mold('Core', function() {
             return this.urlencode(str);
         }
     };
-}());
+}()));
 /** @ignore */
 (function() {
     for (var i in Jelo.Core) {
-        Jelo[i] = Jelo.Core[i];
+        if (Jelo.Core.hasOwnProperty(i)) {
+            Jelo[i] = Jelo.Core[i];
+        }
     }
 }());

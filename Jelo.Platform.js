@@ -1,7 +1,8 @@
-Jelo.mold('Platform', function(window) {
-    var ua = window.navigator.userAgent.toLowerCase();
+Jelo.mold('Platform', (function(window) {
+    var ua = window.navigator.userAgent.toLowerCase(),
+        document = window.document;
     function create(el) {
-        return window.document.createElement(el);
+        return document.createElement(el);
     }
     function match(regex) {
         var t = regex.test(ua),
@@ -207,4 +208,4 @@ Jelo.mold('Platform', function(window) {
             }
         }
     };
-}(this));
+}(this)));

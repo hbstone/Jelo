@@ -30,7 +30,7 @@
     }
     w.Jelo = new function Jelo() {
         this.constructor = Jelo;
-        this.undefined = undef;
+        this['undefined'] = undef;
         this.emptyFn = function() {};
         this.Version = {
             atLeast: function(a, b, c) {

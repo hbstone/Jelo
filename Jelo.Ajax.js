@@ -2,7 +2,7 @@
  * @namespace Provides asynchronous (and synchronous) communication to the server.
  * @name Jelo.Ajax
  */
-Jelo.mold('Ajax', function() {
+Jelo.mold('Ajax', (function() {
     
     /** @private */
     var D = window.document,
@@ -137,16 +137,15 @@ Jelo.mold('Ajax', function() {
                 ff = o.failure || Jelo.emptyFn,
                 fc = o.callback || Jelo.emptyFn,
                 x = o.abortable ? X : getXHR(),
-                q = (typeof d == 'string') ? d : function(q) {
+                q = (typeof d == 'string') ? d : (function(q) {
                         for (var i in d) {
                             if (d.hasOwnProperty(i)) {
                                 q += ((/\?/).test(q) ? '&' : '?') + encodeURIComponent(i) + '=' + encodeURIComponent(d[i]);
                             }
                         }
                         return q;
-                    }(q || ''),
-                uCache = m + u + q,
-                ua = window.navigator.userAgent + ' Jelo/' + Jelo.Version.toString();
+                    }(q || '')),
+                uCache = m + u + q;
             if (o.cache && cache[uCache]) {
                 x = cache[uCache];
                 fs.call(x, x, o);
@@ -193,4 +192,4 @@ Jelo.mold('Ajax', function() {
         }
     };
     
-}());
+}()));

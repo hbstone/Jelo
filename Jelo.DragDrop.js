@@ -2,17 +2,17 @@
  * @namespace Provides element drag and drop detection.
  * @name Jelo.DragDrop
  */
-Jelo.mold('DragDrop', function() {
+Jelo.mold('DragDrop', (function() {
     
     /** @private */
     var doc = window.document,
         threshold = 1, // pixels
-        maxZ = function() {
+        maxZ = (function() {
             var z = 1000000;
             return function() {
                 return ++z;
             };
-        }(),
+        }()),
         origin = [], // mouse coords, not element coords
         dragTarget = null,
         dragPastThreshold = false,
@@ -358,4 +358,4 @@ Jelo.mold('DragDrop', function() {
         },
         maxZ: maxZ
     };
-}());
+}()));
