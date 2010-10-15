@@ -215,6 +215,9 @@
 .-hidden {
     display: none !important;
 }
+.-invisible {
+    visibility: hidden !important;
+}
 
 /**************************************\
   functional classes
@@ -241,17 +244,4 @@
     font-family: "Arial Unicode MS", Arial, Geneva, sans-serif;
     cursor: se-resize;
     z-index: 99999;
-}
-.-drag-proxy {
-    position: absolute;
-    z-index: 1000000000;
-    background: #f0f6ff;
-    border: 1px dashed #999;
-    border-radius: 5px;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
-    display: none;
-    opacity: 0.9;
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=90)";
-    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=90);
 }
