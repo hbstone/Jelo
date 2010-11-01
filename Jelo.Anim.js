@@ -119,6 +119,18 @@ Jelo.mold('Anim', (function() {
         return obj;
     }
 
+    Jelo.Dom.addShortcuts({
+        animate: function(o) {
+            o = o || [];
+            o.me = this;
+            Jelo.Anim.ate(o);
+            return this;
+        },
+        isAnimating: function() {
+            return Jelo.Anim.ating(this);
+        }
+    });
+
     /** @scope Jelo.Anim */
     return {
         getDefault: function(type) {
