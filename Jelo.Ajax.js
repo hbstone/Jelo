@@ -166,6 +166,7 @@ Jelo.mold('Ajax', (function() {
                     if (o.cache) {
                         cache[uCache] = x;
                     }
+                    x.onreadystatechange = null;
                 }
             };
             switch (m) {
