@@ -81,29 +81,29 @@
             };
         }();
         this.load = function() {
-            var i,
+            var s,
                 a = [].slice.call(arguments),
                 f = a.pop(),
                 l = a.length,
                 xhr = new XMLHttpRequest(); // should have sent a poet
             if (a.length) {
                 a = encodeURIComponent(encodeURIComponent(a.join('`'))); // gets decoded twice by the time it hits the page
-                i = d.createElement('script');
-                i.src = 'http://fatfreejelo.com/load/' + a + '/';
-                if (i.readyState) {
-                    i.onreadystatechange = function() {
+                s = d.createElement('script');
+                s.src = 'http://fatfreejelo.com/load/' + a + '/';
+                if (s.readyState) {
+                    s.onreadystatechange = function() {
                         if ((/loaded|complete/).test(i.readyState)) {
-                            i.onreadystatechange = null;
+                            s.onreadystatechange = null;
                             fn.push(f);
                         }
                     }
                 } else {
-                    i.onload = function() {
-                        i.onload = null;
+                    s.onload = function() {
+                        s.onload = null;
                         fn.push(f);
                     }
                 }
-                d.documentElement.childNodes[0].appendChild(i);
+                d.getElementsByTagName('script')[0].parentNode.appendChild(s);
             } else {
                 fn.push(f);
             }
