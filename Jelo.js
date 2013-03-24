@@ -53,7 +53,7 @@
             },
             major: 3,
             minor: 0,
-            revision: 5
+            revision: 8
         };
         this.isReady = !!rdy;
         this.debugMode = !!dbg;
