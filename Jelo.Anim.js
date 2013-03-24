@@ -96,7 +96,6 @@ Jelo.mold('Anim', (function() {
         if (isNaN(obj.duration)) {
             obj.duration = defaults.duration;
         }
-        obj.duration = (obj.duration * 1000).toFixed(0);
         if (!obj.me) {
             obj.me = defaults.me;
         }
