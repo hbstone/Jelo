@@ -3,7 +3,7 @@
 
 (function(name, parent) {
 
-    var defaultDuration = 0.48, // default duration, ms
+    var defaultDuration = 480, // default duration, ms
         elements = {}, // hash for stopping ALL animation
         mark = 'emile' + (+new Date), // unique string (per page load) to track animated elements
         proxy = document.createElement('div'), // off-page element for CSS parsing
